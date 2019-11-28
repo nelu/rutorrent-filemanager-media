@@ -1,10 +1,49 @@
 {% extends "flm::dialog-window.twig" %}
 
 {% block content %}
-    <video width="320" height="240" controls>
+
+<div style="max-width:648px;max-height:480px;">
+    {% if getExt(selectedTarget) in "mp3|mp4]|avi|divx|mkv)" %}
+    <video width="100%" height="480px;" controls>
         <source src="{{ public_endpoint }}/{{ selectedTarget }}" type="video/mp4">
         Your browser does not support the video tag.
     </video>
+        {%  else %}
+            <figure class="zoom" onmousemove="zoom(event)" style="background-image: url('{{ public_endpoint }}/{{ selectedTarget }}')">
+                <img src="{{ public_endpoint }}/{{ selectedTarget }}" />
+            </figure>
+    {% endif %}
+</div>
+{% endblock %}
+{% block scripts %}
+    <style>
+        figure.zoom {
+            background-position: 50% 50%;
+            position: relative;
+            width: 500px;
+            overflow: hidden;
+            cursor: zoom-in;
+        }
+        figure.zoom img:hover {
+            opacity: 0;
+        }
+        figure.zoom img {
+            transition: opacity .5s;
+            display: block;
+            width: 100%;
+        }
+    </style>
+    <script>
+        function zoom(e){
+            var zoomer = e.currentTarget;
+            e.offsetX ? offsetX = e.offsetX : offsetX = e.touches[0].pageX
+            e.offsetY ? offsetY = e.offsetY : offsetX = e.touches[0].pageX
+            x = offsetX/zoomer.offsetWidth*100
+            y = offsetY/zoomer.offsetHeight*100
+            zoomer.style.backgroundPosition = x + '% ' + y + '%';
+        }
+    </script>
+
 {% endblock %}
 {% block buttons %}
     <div class="aright buttons-list">

@@ -12,7 +12,12 @@ plugin.loadLang();
 
 	media.play = function(target) {
 
-		flm.ui.getDialogs().showDialog('flm-media-player');
+		flm.ui.getDialogs().showDialog('flm-media-player',
+			{
+				afterHide: function () {
+					media.stop();
+				}
+			});
 /*
 		theWebUI.fManager.action.request('action=sess',
 			function (data) {
@@ -23,10 +28,19 @@ plugin.loadLang();
 				} catch(err) { }
 			});*/
 	};
+
+	media.getVideoPlayer = function()
+	{		var diagId = flm.ui.getDialogs().getDialogId('flm-media-player');
+
+		return $(diagId).find('video');
+	};
 	
 	media.stop= function() {
-		try {this.player.Stop();} catch(err) { }
+
+		var player = media.getVideoPlayer();
+		player.length > 0 && player[0].pause();
 	};
+
 	media.createScreenshots= function (target) {
 
 		if (!(theWebUI.fManager.actiontoken.length > 1)) {
@@ -72,7 +86,7 @@ plugin.loadLang();
 
 		flmDialogs.forms['flm-media-player'] = {
 				options: {
-					public_endpoint: theWebUI.settings["webui.flm-media.config"].public_endpoint,
+					public_endpoint: plugin.config.public_endpoint,
 					views: "flm-media"
 				},
 				modal: false,
@@ -87,7 +101,7 @@ plugin.loadLang();
 		if(plugin.enabled) {
 
 			var el = theContextMenu.get(theUILang.fOpen);
-			if(el && flm.utils.getExt(path).match(/^(mp[34]|avi|divx|mkv)$/i)) {
+			if(el && flm.utils.getExt(path).match(/^(mp[34]|avi|divx|mkv|png|jpeg|gif)$/i)) {
 
 				menu.add(el,[CMENU_SEP]);
 				menu.add(el,[theUILang.fView, function() {media.play(path);}]);
@@ -116,6 +130,8 @@ plugin.loadLang();
 			function (flmUi) {
 				window.flm.ui.browser.onSetEntryMenu(media.setMenuEntries);
 				media.setDialogs(flm.ui.getDialogs());
+
+				console.log(plugin.config);
 				window.flm.media = media;
 			},
 			function (reason) {
