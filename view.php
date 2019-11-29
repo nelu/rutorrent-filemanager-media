@@ -28,7 +28,6 @@ class FileMedia extends WebController {
         {
             $_POST['action'] = 'viewMedia';
             $_POST['target'] = $_SERVER["PATH_INFO"];
-
         }
 
         parent::__construct($config);
@@ -57,8 +56,9 @@ class FileMedia extends WebController {
             Helper::jsonError(18);
         }
 
-
 		$this->streamFile($sf);
+
+		die();
 	}
 
 

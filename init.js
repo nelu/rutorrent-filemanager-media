@@ -125,23 +125,32 @@ plugin.loadLang();
 
 	};
 
-	window.flm.api.createScreensheet = function(source, destination, options) {
-		return window.flm.api.post({
-			method: 'fileScreenSheet',
-			options: options,
-			target: source,
-			to: destination
-		});
+
+	media.init = function(){
+
+		window.flm.ui.browser.onSetEntryMenu(media.setMenuEntries);
+		media.setDialogs(flm.ui.getDialogs());
+
+		console.log(plugin.config);
+
+		window.flm.api.createScreensheet = function(source, destination, options) {
+			return window.flm.api.post({
+				method: 'fileScreenSheet',
+				options: options,
+				target: source,
+				to: destination
+			});
+		};
 	};
+
+
 
 	//onSetEntryMenu
 	thePlugins.get('filemanager').ui.readyPromise
 		.then(
 			function (flmUi) {
-				window.flm.ui.browser.onSetEntryMenu(media.setMenuEntries);
-				media.setDialogs(flm.ui.getDialogs());
+				media.init();
 
-				console.log(plugin.config);
 				window.flm.media = media;
 			},
 			function (reason) {
