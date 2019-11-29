@@ -9,9 +9,11 @@
         Your browser does not support the video tag.
     </video>
         {%  else %}
-            <figure class="zoom" onmousemove="zoom(event)" style="background-image: url('{{ public_endpoint }}/{{ selectedTarget }}')">
+            <div style="min-height: 360px;">
+            <figure class="zoom" onmousemove="zoom(event)" style=" background-image: url('{{ public_endpoint }}/{{ selectedTarget }}')">
                 <img src="{{ public_endpoint }}/{{ selectedTarget }}" />
             </figure>
+            </div>
     {% endif %}
 </div>
 {% endblock %}

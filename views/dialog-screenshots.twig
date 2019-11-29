@@ -1,0 +1,86 @@
+{% extends "flm::dialog-window.twig" %}
+{% import "flm::dialog-window.twig" as window %}
+
+{% block heading %}
+    <fieldset><legend>Video file:</legend>
+        <div class="flm-diag-nav-path-screens-source" style="padding:4px;">{{ selectedTarget }}</div>
+    </fieldset>
+{% endblock %}
+
+{% block content %}
+{{ window.pathBrowser(selectedTarget, theUILang.flm_media_screens_file) }}
+
+<fieldset><legend>Options:</legend>
+
+    <label style="float: left;" for="flm-media-screenshots-type">Format:</label>
+    <select name="flm-media-screenshots-type" id="flm-media-screenshots-type" >
+        <option selected="selected">Screenshots (multiple files)</option>
+        <option value="sheet">Screensheet (single file - mosaic)</option>
+    </select>
+
+    <div class="flm-media-screensheet-settings" style="display: none;">
+    <legend>Screensheet Settings:</legend>
+    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <td>Screens rows:</td>
+            <td><input type="text" name="textfield" class="Textbox num1" id="flm-settings-opt-scrows" value=""/></td>
+        </tr>
+        <tr>
+            <td>Screens columns:</td>
+            <td><input type="text" name="textfield" class="Textbox num1" id="flm-settings-opt-sccols" value=""/></td>
+        </tr>
+        <tr>
+            <td>Thumbnail width:</td>
+            <td><input type="text" name="textfield" class="Textbox num1" id="flm-settings-opt-scwidth" value=""/></td>
+        </tr>
+    </table>
+    </div>
+</fieldset>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    (function (global) {
+        var dialogs = flm.ui.getDialogs();
+        var diagId = dialogs.getDialogId();
+
+        // snapshot when trigerring
+        var currentPath = flm.getCurrentPath();
+        var ext = 'jpg';
+
+        var sheet_settings = $(".flm-media-screensheet-settings");
+
+        var type = $("#flm-media-screenshots-type");
+        var screen_rows = $("#flm-settings-opt-scrows");
+        var screen_cols = $("#flm-settings-opt-sccols");
+        var screen_width = $("#flm-settings-opt-scwidth");
+
+
+
+
+        dialogs.onStart(function () {
+
+            var source = $('flm-diag-nav-path-screens-source').val();
+
+            dialogs.disableStartButton();
+
+            return flm.manager.doScreenshots(source, dialogs.getTargetPath(diagId) );
+        });
+
+        var file  = flm.ui.browser.getSelectedEntry();
+
+        file = flm.getCurrentPath(flm.utils.stripFileExtension(file, [ext]));
+
+        var fileName = file+ '.' + ext;
+
+        dialogs.updateTargetPath(diagId, fileName);
+
+
+        type.change(function () {
+            $(this).val() === 'sheet' && sheet_settings.show() || sheet_settings.hide();
+        });
+
+    })(window);
+</script>
+{% endblock %}
+
