@@ -86,27 +86,29 @@ plugin.loadLang();
 
 	media.setMenuEntries = function (menu, path) {
 
-		var pathIsDir = flm.utils.isDir(path);
-
 		if(plugin.enabled) {
 
 			var ext = flm.utils.getExt(path);
 
 			if(ext.match(/^(mp[34]|avi|divx|mkv|png|jpeg|gif)$/i)) {
 
-				var el = theContextMenu.get(theUILang.fOpen);
-				if(el)
+				var openPos = thePlugins.get('filemanager').ui.getContextMenuEntryPosition(menu, theUILang.fOpen);
+
+				if(openPos > -1)
 				{
-					menu.add(el,[CMENU_SEP]);
-					menu.add(el,[theUILang.fView, function() {media.play(path);}]);
-					menu.add(el,[CMENU_SEP]);
+
+					menu.splice(++openPos, 0, [theUILang.fView, function() {media.play(path);}]);
+					menu.splice(++openPos, 0, [CMENU_SEP]);
 				}
 
 				if(ext.match(/^(mp4|avi|divx|mkv)$/i)) {
-					var sub = theContextMenu.get(theUILang.fcreate).children().last();
-					if(sub)
+					var createPos = thePlugins.get('filemanager').ui.getContextMenuEntryPosition(menu, theUILang.fcreate, 1);
+
+					if(createPos > -1)
 					{
-						menu.add(sub,[theUILang['flm_popup_media-screenshots'], /*(
+
+
+						menu[createPos][2].push([theUILang['flm_popup_media-screenshots'], /*(
 							thePlugins.isInstalled('screenshots')
 							&& !pathIsDir
 							&& flm.utils.getExt(path).match(new RegExp("^(" + thePlugins.get('screenshots').extensions.join('|') + ")$", "i"))
@@ -118,6 +120,9 @@ plugin.loadLang();
 							}
 							: null]);
 					}
+
+					debugger;
+
 				}
 			}
 
