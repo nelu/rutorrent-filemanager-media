@@ -96,7 +96,6 @@ plugin.loadLang();
 
 				if(openPos > -1)
 				{
-
 					menu.splice(++openPos, 0, [theUILang.fView, function() {media.play(path);}]);
 					menu.splice(++openPos, 0, [CMENU_SEP]);
 				}
@@ -106,22 +105,17 @@ plugin.loadLang();
 
 					if(createPos > -1)
 					{
-
-
-						menu[createPos][2].push([theUILang['flm_popup_media-screenshots'], /*(
+						menu[createPos][2].push([theUILang['flm_popup_media-screenshots'], (
 							thePlugins.isInstalled('screenshots')
-							&& !pathIsDir
+							&& !flm.utils.isDir(path)
 							&& flm.utils.getExt(path).match(new RegExp("^(" + thePlugins.get('screenshots').extensions.join('|') + ")$", "i"))
-						) */
-						true
+						)
+
 							? function () {
-								console.log('need screenshots?');
 								flm.ui.getDialogs().showDialog('media-screenshots');
 							}
 							: null]);
 					}
-
-					debugger;
 
 				}
 			}
@@ -130,13 +124,10 @@ plugin.loadLang();
 
 	};
 
-
 	media.init = function(){
 
 		window.flm.ui.browser.onSetEntryMenu(media.setMenuEntries);
 		media.setDialogs(flm.ui.getDialogs());
-
-		console.log(plugin.config);
 
 		window.flm.api.createScreensheet = function(source, destination, options) {
 			return window.flm.api.post({
@@ -147,8 +138,6 @@ plugin.loadLang();
 			});
 		};
 	};
-
-
 
 	//onSetEntryMenu
 	thePlugins.get('filemanager').ui.readyPromise
@@ -164,7 +153,6 @@ plugin.loadLang();
 		);
 
 })(window);
-
 
 
 plugin.onLangLoaded = function() {
