@@ -5,8 +5,9 @@ namespace Flm\Media;
 
 
 use Flm\Helper;
+use Flm\TaskController;
 
-class Tasks
+class Tasks extends TaskController
 {
     public static function ffmpegScreensheetCmd($params) {
 

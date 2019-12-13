@@ -21,6 +21,38 @@ class FileManagerMedia extends \Flm\BaseController {
         parent::__construct($config);
     }
 
+
+
+    public function fileScreenSheet($params) {
+
+
+
+        if (!isset($params->to)) {
+            self::jsonError(2);
+        }
+
+        if (!isset($params->target)) {
+            self::jsonError(2);
+        }
+
+        try {
+
+
+
+            $temp = $this->flm()->videoScreenshots($params->target, $params->to);
+
+        } catch (\Exception $err) {
+            var_dump($err);
+            self::jsonError($err->getCode());
+            return false;
+        }
+
+        return ['error' => 0, 'tmpdir' => $temp['tok']];
+
+
+        $e->screenshots($e->postlist['target'], $e->postlist['to']);
+    }
+
     public function viewMedia($params) {
 
 
@@ -49,6 +81,62 @@ class FileManagerMedia extends \Flm\BaseController {
         die();
     }
 
+    protected function doVideoScreenSheet($file, $output) {
+
+        $fs = Fs::get();
+
+        $video_file = $this->getUserDir($file);
+        $screens_file = $this->getUserDir($output);
+
+        if (!$fs->isFile($video_file) ) {
+            throw new Exception("Error Processing Request", 6);
+        }else  if($fs->isFile($screens_file)) {
+            throw new Exception("dest is file", 16);
+        }
+
+        $defaults = array('scrows' => '12', 'sccols' => 4, 'scwidth' => 300 );
+
+        $uisettings = json_decode(file_get_contents(getSettingsPath().'/uisettings.json'), true);
+        $settings = array();
+
+        foreach($defaults as $k => $value) {
+            $settings[$k] = (isset($uisettings['webui.fManager.'.$k]) && ($uisettings['webui.fManager.'.$k] > 1)) ? $uisettings['webui.fManager.'.$k] : $value;
+        }
+
+        $vinfo = $this->video_info($video_file);
+
+        $frame_step = floor($vinfo['total_frames'] / ($settings['scrows'] * $settings['sccols']));
+
+        $settings['frame_step'] = $frame_step;
+
+        $temp = Helper::getTempDir();
+
+
+        $args = array('action' => 'makeScreensheet',
+            'params' => array(
+                'imgfile' => $screens_file,
+                'file' => $video_file,
+                'options' => $settings,
+                'binary'=> getExternal('ffmpeg')
+            ),
+            'temp' => $temp );
+
+        $task = $temp['dir'].'task';
+
+        file_put_contents($task, json_encode($args));
+
+        $task_opts = array  ( 'requester'=>'filemanager',
+            'name'=>'screensheet',
+        );
+
+        $rtask = new \rTask( $task_opts );
+        $commands = array( Helper::getTaskCmd() ." ". escapeshellarg($task) );
+        $ret = $rtask->start($commands, 0);
+
+        //   var_dump($ret);
+
+        return $temp;
+    }
 
     protected function streamFile($filename, $contentType = null,  $mustExit = false )
     {
@@ -186,91 +274,5 @@ class FileManagerMedia extends \Flm\BaseController {
 
     }
 
-    public function videoScreenshots($file, $output) {
-
-        $fs = Fs::get();
-
-        $video_file = $this->getUserDir($file);
-        $screens_file = $this->getUserDir($output);
-
-        if (!$fs->isFile($video_file) ) {
-            throw new Exception("Error Processing Request", 6);
-        }else  if($fs->isFile($screens_file)) {
-            throw new Exception("dest is file", 16);
-        }
-
-        $defaults = array('scrows' => '12', 'sccols' => 4, 'scwidth' => 300 );
-
-        $uisettings = json_decode(file_get_contents(getSettingsPath().'/uisettings.json'), true);
-        $settings = array();
-
-        foreach($defaults as $k => $value) {
-            $settings[$k] = (isset($uisettings['webui.fManager.'.$k]) && ($uisettings['webui.fManager.'.$k] > 1)) ? $uisettings['webui.fManager.'.$k] : $value;
-        }
-
-        $vinfo = $this->video_info($video_file);
-
-        $frame_step = floor($vinfo['total_frames'] / ($settings['scrows'] * $settings['sccols']));
-
-        $settings['frame_step'] = $frame_step;
-
-        $temp = Helper::getTempDir();
-
-
-        $args = array('action' => 'makeScreensheet',
-            'params' => array(
-                'imgfile' => $screens_file,
-                'file' => $video_file,
-                'options' => $settings,
-                'binary'=> getExternal('ffmpeg')
-            ),
-            'temp' => $temp );
-
-        $task = $temp['dir'].'task';
-
-        file_put_contents($task, json_encode($args));
-
-        $task_opts = array  ( 'requester'=>'filemanager',
-            'name'=>'screensheet',
-        );
-
-        $rtask = new \rTask( $task_opts );
-        $commands = array( Helper::getTaskCmd() ." ". escapeshellarg($task) );
-        $ret = $rtask->start($commands, 0);
-
-        //   var_dump($ret);
-
-        return $temp;
-    }
-
-    public function fileScreenSheet($params) {
-
-
-
-        if (!isset($params->to)) {
-            self::jsonError(2);
-        }
-
-        if (!isset($params->target)) {
-            self::jsonError(2);
-        }
-
-        try {
-
-
-
-            $temp = $this->flm()->videoScreenshots($params->target, $params->to);
-
-        } catch (\Exception $err) {
-            var_dump($err);
-            self::jsonError($err->getCode());
-            return false;
-        }
-
-        return ['error' => 0, 'tmpdir' => $temp['tok']];
-
-
-        $e->screenshots($e->postlist['target'], $e->postlist['to']);
-    }
 
 }
