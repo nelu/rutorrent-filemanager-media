@@ -4,11 +4,24 @@
 namespace Flm\Media;
 
 
+use Exception;
+use Flm\FsUtils;
 use Flm\Helper;
 use Flm\TaskController;
 
 class Tasks extends TaskController
 {
+    public function  makeScreensheet() {
+        $cmd = FsUtils::ffmpegScreensheetCmd(clone $this->info->params);
+
+        try {
+            $output =  $this->LogCmdExec($cmd);
+        }
+        catch (Exception $err) {
+            var_dump($err);
+        }
+    }
+
     public static function ffmpegScreensheetCmd($params) {
 
         $options = $params->options;
