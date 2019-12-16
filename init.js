@@ -33,7 +33,7 @@ plugin.loadLang();
 
 	media.createScreenshots= function (target) {
 
-		if (!(theWebUI.fManager.actiontoken.length > 1)) {
+		if (!(theWebUI.FileManager.actiontoken.length > 1)) {
 
 			$('#fMan_Screenshotslist').html(flm.currentPath + '<strong>' + target + '</strong>');
 			$('#fMan_Screenshotsbpath').val(this.homedir + flm.currentPath + 'screens_' + this.recname(target) + '.png');
