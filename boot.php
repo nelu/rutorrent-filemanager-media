@@ -13,4 +13,5 @@ require_once ($flmPluginDir . '/../_task/task.php');
 
 $pluginDir = dirname(__FILE__) . DIRECTORY_SEPARATOR;
 require_once ( $pluginDir . 'src/Tasks.php');
+require_once ( $pluginDir . 'src/Screenshots.php');
 require_once ( $pluginDir . 'src/FileManagerMedia.php');

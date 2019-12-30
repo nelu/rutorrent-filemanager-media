@@ -8,6 +8,8 @@ use Exception;
 use Flm\FsUtils;
 use Flm\Helper;
 use Flm\TaskController;
+use rTask;
+use Throwable;
 
 class Tasks extends TaskController
 {
@@ -19,6 +21,27 @@ class Tasks extends TaskController
         }
         catch (Exception $err) {
             var_dump($err);
+        }
+
+
+        $task_opts = [
+            'requester'=>'filemanager-media',
+            'name'=>'screenshots',
+            'arg' =>  count($this->info->params->files) . ' files in ' .  $this->info->params->archive
+        ];
+
+        $ret = false;
+        try {
+            $cmds = [
+                'cd ' . Helper::mb_escapeshellarg($this->info->params->options->workdir),
+                '{', FsUtils::getArchiveCompressCmd($this->info->params),  '}',
+            ];
+
+            $rtask = new rTask( $task_opts );
+            $ret = $rtask->start($cmds, rTask::FLG_DEFAULT & rTask::FLG_ECHO_CMD);
+        }
+        catch (Throwable $err) {
+            $ret = $err;
         }
     }
 
@@ -37,5 +60,9 @@ class Tasks extends TaskController
         return <<<CMD
 {$params->binary} -i {$video_file} -an -vf {$filters} -vsync 0 -frames:v 1 {$screenfile} 2>&1 | sed -u 's/^/0:  /'
 CMD;
+    }
+
+    public static function getTaskCmd($taskFile) {
+        return getExternal("php"). ' '. dirname(__FILE__) .'/..'. DIRECTORY_SEPARATOR. $taskFile;
     }
 }
