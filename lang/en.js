@@ -5,6 +5,4 @@ theUILang.flm_media_start_screenshots =	'Video screenshots creation started. Ple
 theUILang.flm_media_screenshots = 'Video screenshots creation stopped';
 
 
-
 thePlugins.get("filemanager-media").langLoaded();
-
