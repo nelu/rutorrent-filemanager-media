@@ -6,7 +6,8 @@ plugin.loadLang();
 (function flmMedia(window) {
 
 	var media = {
-		stp:  'plugins/mediastream/view.php'
+		stp:  'plugins/mediastream/view.php',
+		api: null
 	};
 
 	media.play = function(target) {
@@ -25,36 +26,34 @@ plugin.loadLang();
 		return $(diagId).find('video');
 	};
 	
-	media.stop= function() {
+	media.stop = function() {
 
 		var player = media.getVideoPlayer();
 		player.length > 0 && player[0].pause();
 	};
 
-	media.createScreenshots= function (target) {
+	media.doScreenshots = function (sourceFile, screenShotFileName) {
 
-		if (!(theWebUI.FileManager.actiontoken.length > 1)) {
+		return this.api.post({
+			method: 'createFileScreenshots',
+			target: sourceFile,
+			to: screenShotFileName
+		}).then(function (value) {
+			flm.manager.logAction(theUILang["flm_popup_media-screenshots"], theUILang.flm_media_start_screenshots);
+		});
 
-			$('#fMan_Screenshotslist').html(flm.currentPath + '<strong>' + target + '</strong>');
-			$('#fMan_Screenshotsbpath').val(this.homedir + flm.currentPath + 'screens_' + this.recname(target) + '.png');
-			$('#fMan_Screenshots .fMan_Start').attr('disabled', false);
-		}
-
-		this.makeVisbile('fMan_Screenshots');
 	};
-	media.doScreenshots = function (button, diag) {
 
-		var screen_file = this.checkInputs(diag);
-		if (screen_file === false) {
-			return false;
-		}
+	media.doScreensheet = function (sourceFile, screenShotFileName, config) {
 
-		var video = $('#fMan_Screenshotslist').text();
-
-		$(button).attr('disabled', true);
-
-		this.actStart(diag);
-
+		return this.api.post({
+				method: 'createFileScreenSheet',
+				target: sourceFile,
+				to: screenShotFileName,
+				settings: config
+			}).then(function (value) {
+				flm.manager.logAction(theUILang["flm_popup_media-screenshots"], theUILang.flm_media_start_screenshots);
+			});
 
 	};
 
@@ -90,7 +89,9 @@ plugin.loadLang();
 
 			var ext = flm.utils.getExt(path);
 
-			if(ext.match(/^(mp[34]|avi|divx|mkv|png|jpeg|gif)$/i)) {
+			var re = new RegExp('^('+plugin.config.allowedViewFormats+')$', "i");
+
+			if(ext.match(re)) {
 
 				var openPos = thePlugins.get('filemanager').ui.getContextMenuEntryPosition(menu, theUILang.fOpen);
 
@@ -126,17 +127,10 @@ plugin.loadLang();
 
 	media.init = function(){
 
+		this.api = flm.client(plugin.path+'view.php');
+
 		window.flm.ui.browser.onSetEntryMenu(media.setMenuEntries);
 		media.setDialogs(flm.ui.getDialogs());
-
-		window.flm.api.createScreensheet = function(source, destination, options) {
-			return window.flm.api.post({
-				method: 'fileScreenSheet',
-				options: options,
-				target: source,
-				to: destination
-			});
-		};
 	};
 
 	//onSetEntryMenu

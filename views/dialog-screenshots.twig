@@ -23,15 +23,15 @@
     <table width="100%" border="0" cellspacing="0" cellpadding="0">
         <tr>
             <td>Screens rows:</td>
-            <td><input type="text" name="textfield" class="Textbox num1" id="flm-settings-opt-scrows" value=""/></td>
+            <td><input type="text" name="textfield" class="Textbox num1" id="flm-settings-opt-scrows" value="12"/></td>
         </tr>
         <tr>
             <td>Screens columns:</td>
-            <td><input type="text" name="textfield" class="Textbox num1" id="flm-settings-opt-sccols" value=""/></td>
+            <td><input type="text" name="textfield" class="Textbox num1" id="flm-settings-opt-sccols" value="4"/></td>
         </tr>
         <tr>
             <td>Thumbnail width:</td>
-            <td><input type="text" name="textfield" class="Textbox num1" id="flm-settings-opt-scwidth" value=""/></td>
+            <td><input type="text" name="textfield" class="Textbox num1" id="flm-settings-opt-scwidth" value="130"/></td>
         </tr>
     </table>
     </div>
@@ -56,17 +56,6 @@
         var screen_width = $("#flm-settings-opt-scwidth");
 
 
-
-
-        dialogs.onStart(function () {
-
-            var source = $('flm-diag-nav-path-screens-source').val();
-
-            dialogs.disableStartButton();
-
-            return flm.manager.doScreenshots(source, dialogs.getTargetPath(diagId) );
-        });
-
         var file  = flm.ui.browser.getSelectedEntry();
 
         file = flm.utils.buildPath([flm.utils.basedir(file), flm.utils.stripFileExtension(file, [ext])]);
@@ -74,6 +63,26 @@
         var fileName = file+ '.' + ext;
 
         dialogs.updateTargetPath(diagId, fileName);
+
+        dialogs.onStart(function () {
+            var source = $(".flm-diag-nav-path-screens-source").text();
+
+            dialogs.disableStartButton();
+
+            return type.val() === 'sheet'
+                ? flm.media.doScreensheet(
+                    source,
+                    dialogs.getTargetPath(diagId),
+                    {
+                        rows: screen_rows.val(),
+                        columns: screen_cols.val(),
+                        width: screen_width.val()
+                    }
+                )
+                : flm.media.doScreenshots(source, dialogs.getTargetPath(diagId));
+        });
+
+
 
 
         type.change(function () {
