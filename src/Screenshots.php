@@ -57,6 +57,8 @@ class Screenshots
             'binary' => Utility::getExternal('ffmpeg')
         ];
 
+        $cmd = self::ffmpegScreensheetCmd($params);
+
         $task_opts = [
             'requester' => 'filemanager-media',
             'name' => 'screensheet',
@@ -65,9 +67,7 @@ class Screenshots
 
         $rtask = new rTask($task_opts);
 
-        $cmd = self::ffmpegScreensheetCmd($params);
-
-        return $rtask->start([$cmd], 0);;
+        return $rtask->start([$cmd], rTask::FLG_ECHO_CMD);;
     }
 
     /**
@@ -139,11 +139,12 @@ class Screenshots
         $video_file = Helper::mb_escapeshellarg($params->file);
         $screenfile = Helper::mb_escapeshellarg($params->imgfile);
 
-        $filters = 'drawtext="timecode=\'00\:00\:00\:00\' :rate=24 :fontcolor=white :fontsize=21 :shadowcolor=black :x=5 :y=5",' .
-            'scale="min(' . $options->width . '\, iw*3/2):-1",' .
-            'select="not(mod(n\,' . $options->frame_step . ')),tile=' . $options->columns . 'x' . $options->rows . '"';
+        $filters = 'drawtext="timecode=\'00\:00\:00\:00\' :box=1 :boxcolor=black :boxborderw=5 :fontcolor=white :rate=30 :fontsize=ceil(6.1/100*h) :shadowcolor=white :x=0 :y=0",' .
+            'scale="' . $options->width . ':-1",' .
+            'select="not(mod(n\,' . $options->frame_step . '))",'.
+            'tile="' . $options->columns . 'x' . $options->rows . ':padding=3:margin=2"';
 
-        return "{$params->binary} -i {$video_file} -an -vf {$filters} -vsync 0 -frames:v 1 {$screenfile}";
+        return "{$params->binary} -i {$video_file} -an -vf {$filters} -vsync 0 -frames:v 1 -qscale:v 3 {$screenfile}";
     }
 
 }

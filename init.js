@@ -154,6 +154,11 @@ plugin.onLangLoaded = function() {
 
 };
 
+plugin.onTaskFinished = function(task,onBackground)
+{
+	console.log('Screenshots finished', task, onBackground);
+};
+
 /*plugin.onRemove = function() {
 	theWebUI.VPLAY.stop();
 	$('#VPLAY_diag').remove();
