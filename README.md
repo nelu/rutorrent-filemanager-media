@@ -15,6 +15,6 @@ $allowedFormats = [
     'image' => 'png|jpe?g'
 ];
 ```
-  - `$allowedFormats` holds the allowed media formats file extensions (audio/video/image)
+  - `$allowedFormats` holds the allowed media formats file extensions (audio/video/image) in regex format
   - `$streampath` is useful when you need a different the url path for the media viewer (ex: when you use a replacement video player in your browser and web auth) 
   
