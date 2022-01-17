@@ -16,5 +16,12 @@ $allowedFormats = [
 ];
 ```
   - `$allowedFormats` holds the allowed media formats file extensions (audio/video/image) in regex format
-  - `$streampath` is useful when you need a different the url path for the media viewer (ex: when you use a replacement video player in your browser and web auth) 
+  - `$streampath` is useful when you need a different url path for your media files (ex: when you use a replacement video player in your browser and web auth) 
   
+Settings available in the screenshot dialog:
+ - Screens rows: number of thumbnail rows in the output screensheet 
+ - Screens columns: number of thumbnail columns in the output screensheet 
+ - Thumbnail width: the width of each cell in the screensheet tile
+
+
+
