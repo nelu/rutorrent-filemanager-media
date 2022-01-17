@@ -16,58 +16,51 @@ use Utility;
 class Screenshots
 {
 
-    protected $config;
+    protected $config = [];
+    protected $videoFile;
+    protected $output;
+
+    const DEFAULT_SHEET_CONFIG = ['rows' => '6', 'columns' => 4, 'width' => 480];
 
 
-    public function __construct($config = null)
+    public function __construct($videoSrc, $output, $config = [])
     {
-        $this->config = $config;
+        $this->videoFile = $videoSrc;
+        $this->output = $output;
+        $this->setConfig($config);
 
     }
 
-    public function doVideoScreenSheet($video_file, $screens_file, $settings)
+    public function setConfig($cfg = [])
     {
-
-        $fs = Fs::get();
-
-        if (!$fs->isFile($video_file)) {
-            throw new Exception("No such file", 6);
-        } else if ($fs->isFile($screens_file)) {
-            throw new Exception("File already exists", 16);
-        }
-
-        $defaults = ['rows' => '12', 'columns' => 4, 'width' => 300];
-
-        foreach ($defaults as $k => $value) {
-            if (!isset($settings[$k]) || $settings[$k] < 1) {
-                $settings[$k] = $value;
+        foreach (self::DEFAULT_SHEET_CONFIG as $k => $value) {
+            if (!isset($cfg[$k]) || $cfg[$k] < 1) {
+                $this->config[$k] = $value;
+            } else{
+                $this->config[$k] = $cfg[$k];
             }
         }
+    }
 
-        $vinfo = $this->videoInfo($video_file);
+    public function getSheetCmd()
+    {
+        $vinfo = self::videoInfo($this->videoFile);
 
-        $frame_step = floor($vinfo['total_frames'] / ($settings['rows'] * $settings['columns']));
+        $frame_step = floor($vinfo['total_frames'] / ($this->config['rows'] * $this->config['columns']));
 
-        $settings['frame_step'] = $frame_step;
+        $this->config['frame_step'] = $frame_step;
 
         $params = (object)[
-            'imgfile' => $screens_file,
-            'file' => $video_file,
-            'options' => (object)$settings,
+            'imgfile' => $this->output,
+            'file' => $this->videoFile,
+            'options' => (object)$this->config,
             'binary' => Utility::getExternal('ffmpeg')
         ];
 
         $cmd = self::ffmpegScreensheetCmd($params);
 
-        $task_opts = [
-            'requester' => 'filemanager-media',
-            'name' => 'screensheet',
-            'arg' => $screens_file
-        ];
+        return [$cmd];
 
-        $rtask = new rTask($task_opts);
-
-        return $rtask->start([$cmd], rTask::FLG_ECHO_CMD);;
     }
 
     /**

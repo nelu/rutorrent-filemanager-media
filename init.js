@@ -10,6 +10,10 @@ plugin.loadLang();
 		api: null
 	};
 
+	media.onTaskDone = function(task) {
+		flm.Refresh(task.params.workdir);
+	};
+
 	media.play = function(target) {
 
 		flm.ui.getDialogs().showDialog('flm-media-player',
@@ -21,8 +25,8 @@ plugin.loadLang();
 	};
 
 	media.getVideoPlayer = function()
-	{		var diagId = flm.ui.getDialogs().getDialogId('flm-media-player');
-
+	{
+		var diagId = flm.ui.getDialogs().getDialogId('flm-media-player');
 		return $(diagId).find('video');
 	};
 	
@@ -35,26 +39,30 @@ plugin.loadLang();
 	media.doScreenshots = function (sourceFile, screenShotFileName) {
 
 		return this.api.post({
+			workdir: flm.getCurrentPath(),
 			method: 'createFileScreenshots',
 			target: sourceFile,
 			to: screenShotFileName
 		}).then(function (value) {
-			flm.manager.logAction(theUILang["flm_popup_media-screenshots"], theUILang.flm_media_start_screenshots);
+			//flm.manager.logAction(theUILang["flm_popup_media-screenshots"], theUILang.flm_media_start_screenshots);
 		});
 
 	};
 
 	media.doScreensheet = function (sourceFile, screenShotFileName, config) {
-
-		return this.api.post({
+		var def = $.Deferred()
+		theWebUI.startConsoleTask( "screensheet", plugin.name,
+			{
+				workdir: flm.getCurrentPath(),
 				method: 'createFileScreenSheet',
 				target: sourceFile,
 				to: screenShotFileName,
 				settings: config
-			}).then(function (value) {
-				flm.manager.logAction(theUILang["flm_popup_media-screenshots"], theUILang.flm_media_start_screenshots);
-			});
+			},
+			{ noclose: true });
 
+		def.resolve(theWebUI.getConsoleTask());
+		return def.promise();
 	};
 
 	media.setDialogs = function(flmDialogs) {
@@ -101,7 +109,9 @@ plugin.loadLang();
 					menu.splice(++openPos, 0, [CMENU_SEP]);
 				}
 
-				if(ext.match(/^(mp4|avi|divx|mkv)$/i)) {
+				var videoRe = new RegExp('^('+plugin.config.allowedFormats.video+')$', "i");
+
+				if(ext.match(videoRe)) {
 					var createPos = thePlugins.get('filemanager').ui.getContextMenuEntryPosition(menu, theUILang.fcreate, 1);
 
 					if(createPos > -1)
@@ -126,9 +136,6 @@ plugin.loadLang();
 	};
 
 	media.init = function(){
-
-		this.api = flm.client(plugin.path+'view.php');
-
 		window.flm.ui.browser.onSetEntryMenu(media.setMenuEntries);
 		media.setDialogs(flm.ui.getDialogs());
 	};
@@ -156,7 +163,12 @@ plugin.onLangLoaded = function() {
 
 plugin.onTaskFinished = function(task,onBackground)
 {
-	console.log('Screenshots finished', task, onBackground);
+	(task.requester === plugin.name) && window.flm.media.onTaskDone(task);
+};
+
+plugin.onTaskShowInterface = function(task)
+{
+
 };
 
 /*plugin.onRemove = function() {

@@ -4,39 +4,28 @@ namespace Flm\Media;
 
 use Exception;
 use Flm\BaseController;
+use Flm\Filesystem as Fs;
 use Flm\Helper;
 use LFS;
+use rTask;
 use Throwable;
 
 class FileManagerMedia extends BaseController
 {
-
     public $allowedViewFormats = 'avi|divx|mpeg|mp[34]|mkv|png|jpe?g';
-    protected $screenshots;
 
     public function __construct($config)
     {
-        if (isset($_SERVER["PATH_INFO"]) && !empty($_SERVER["PATH_INFO"])) {
-            $_POST['action'] = 'viewMedia';
-            $_POST['target'] = $_SERVER["PATH_INFO"];
-        }
-
         parent::__construct($config);
 
         if (isset($config['allowedViewFormats'])) {
             $this->allowedViewFormats = $config['allowedViewFormats'];
         }
-
-        $this->screenshots = new Screenshots($config);
     }
 
     public function createFileScreenshots($params)
     {
-
-        $temp = ['tok' => 999];
-
-        return ['error' => 0, 'tmpdir' => $temp['tok']];
-
+        return ['error' => 0, 'tmpdir' => 999];
     }
 
     public function createFileScreenSheet($params)
@@ -50,13 +39,29 @@ class FileManagerMedia extends BaseController
             self::jsonError(2);
         }
 
-        $task = $this->screenshots->doVideoScreenSheet(
-            $this->flm()->getUserDir($params->target),
-            $this->flm()->getUserDir($params->to),
-            $params->settings
-        );
+        $fs = Fs::get();
 
-        return ['error' => 0, 'task' => $task["no"]];
+        $vfile = $this->flm()->getUserDir($params->target);
+        $sfile = $this->flm()->getUserDir($params->to);
+
+        if (!$fs->isFile($vfile)) {
+            throw new Exception("No such file", 6);
+        } else if ($fs->isFile($sfile)) {
+            throw new Exception("File already exists", 16);
+        }
+
+        $screens = new Screenshots($vfile, $sfile, $params->settings);
+
+        $task_opts = [
+            'requester' => 'filemanager-media',
+            'name' => 'screensheet',
+            'arg' => $params->to
+        ];
+
+        $cmds = $screens->getSheetCmd();
+
+        return (new rTask($task_opts))
+            ->start($cmds, rTask::FLG_ECHO_CMD);
 
     }
 
@@ -72,7 +77,7 @@ class FileManagerMedia extends BaseController
 
         $ext = Helper::getExt($file);
 
-        if (!preg_match('/^(avi|divx|mpeg|mp[34]|mkv|png|jpe?g)$/i', $ext)) {
+        if (!preg_match('/^('.$this->allowedViewFormats.')$/i', $ext)) {
             self::jsonError('404 Invalid format' . $ext);
         }
 
