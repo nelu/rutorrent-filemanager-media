@@ -93,8 +93,7 @@
         });
 
         $(diagId + ' .flm-diag-nav-path').change(function (event) {
-            var value = flm.manager.stripHomePath(event.target.value);
-            updateScreenshotFilepath(value);
+            updateScreenshotFilepath(event.target.value);
         });
 
         type.change(function () {
