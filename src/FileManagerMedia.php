@@ -41,8 +41,8 @@ class FileManagerMedia extends BaseController
 
         $fs = Fs::get();
 
-        $vfile = $this->flm()->getUserDir($params->target);
-        $sfile = $this->flm()->getUserDir($params->to);
+        $vfile = $this->flm()->currentDir($params->target);
+        $sfile = $this->flm()->currentDir($params->to);
 
         if (!$fs->isFile($vfile)) {
             throw new Exception("No such file", 6);
@@ -82,7 +82,7 @@ class FileManagerMedia extends BaseController
         }
 
 
-        $sf = $this->flm()->getWorkDir($file);
+        $sf = $this->flm()->currentDir($file);
 
         if (!is_file($sf)) {
             self::jsonError(18);
