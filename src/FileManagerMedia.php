@@ -39,18 +39,22 @@ class FileManagerMedia extends BaseController
             self::jsonError(2);
         }
 
-        $fs = Fs::get();
+        $fs = $this->flm->fs();
 
         $vfile = $this->flm()->currentDir($params->target);
         $sfile = $this->flm()->currentDir($params->to);
 
         if (!$fs->isFile($vfile)) {
-            throw new Exception("No such file", 6);
+            throw new Exception($vfile, 6);
         } else if ($fs->isFile($sfile)) {
-            throw new Exception("File already exists", 16);
+            throw new Exception($sfile, 16);
         }
 
-        $screens = new Screenshots($vfile, $sfile, $params->settings);
+        $screens = new Screenshots(
+            $this->flm()->getFsPath($params->target),
+            $this->flm()->getFsPath($params->to),
+            $params->settings
+        );
 
         $task_opts = [
             'requester' => 'filemanager-media',
@@ -67,8 +71,6 @@ class FileManagerMedia extends BaseController
 
     public function viewMedia($params)
     {
-
-
         if (!isset($_POST['target'])) {
             self::jsonError(16);
         }
@@ -82,7 +84,7 @@ class FileManagerMedia extends BaseController
         }
 
 
-        $sf = $this->flm()->currentDir($file);
+        $sf = $this->flm()->getFsPath($file);
 
         if (!is_file($sf)) {
             self::jsonError(18);
