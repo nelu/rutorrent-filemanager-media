@@ -59,7 +59,7 @@ plugin.loadLang();
 				to: screenShotFileName,
 				settings: config
 			},
-			{ noclose: true });
+			{ noclose: false });
 
 		def.resolve(theWebUI.getConsoleTask());
 		return def.promise();
@@ -163,12 +163,17 @@ plugin.onLangLoaded = function() {
 
 plugin.onTaskFinished = function(task,onBackground)
 {
-	(task.requester === plugin.name) && window.flm.media.onTaskDone(task);
-};
-
-plugin.onTaskShowInterface = function(task)
-{
-
+	if(!task.hasOwnProperty('errcode') && task.errors === 0) {
+		window.flm.media.onTaskDone(task)
+	} else if(task.errors === 0) {
+		// log the request error as task errors
+		task.status = 1;
+		task.errors = [( $type(theUILang.fErrMsg[task.errcode] )
+			? theUILang.fErrMsg[task.errcode] + " -> " + task.msg
+			: task.msg) ];
+		delete task.errcode;
+		thePlugins.get("_task").check(task);
+	}
 };
 
 /*plugin.onRemove = function() {
