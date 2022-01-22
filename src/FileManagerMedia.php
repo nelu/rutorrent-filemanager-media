@@ -4,7 +4,6 @@ namespace Flm\Media;
 
 use Exception;
 use Flm\BaseController;
-use Flm\Filesystem as Fs;
 use Flm\Helper;
 use LFS;
 use rTask;
@@ -63,9 +62,10 @@ class FileManagerMedia extends BaseController
         ];
 
         $cmds = $screens->getSheetCmd();
+        $cmds[] = ' echo '.Helper::mb_escapeshellarg('✓ '.$params->to);
 
         return (new rTask($task_opts))
-            ->start($cmds, rTask::FLG_ECHO_CMD);
+            ->start($cmds, 0);
 
     }
 

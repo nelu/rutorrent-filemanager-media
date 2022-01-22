@@ -8,9 +8,9 @@ $streampath = '/plugins/filemanager-media/view.php';
 
 // regex file extensions
 $allowedFormats = [
-    'video' => 'avi|divx|mpeg|mp4|mkv',
-    'audio' => 'mp3|wav|ogg',
-    'image' => 'png|jpe?g'
+    'video' => 'avi|divx|mpeg|mp4|mkv|webm',
+    'audio' => 'mp3|wav|ogg|aac',
+    'image' => 'png|jpe?g|gif|ico|bmp|svg|webp'
 ];
 
 $allowedViewFormats = implode("|", $allowedFormats);

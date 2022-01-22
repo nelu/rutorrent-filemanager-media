@@ -16,7 +16,10 @@ plugin.loadLang();
 
 	media.play = function(target) {
 
-		flm.ui.getDialogs().showDialog('flm-media-player',
+		var ext = flm.utils.getExt(target);
+
+		flm.ui.dialogs.forms['flm-media-player'].options.isImage = ext.match(new RegExp('^('+plugin.config.allowedFormats.image+')$', "i"));
+		flm.ui.dialogs.showDialog('flm-media-player',
 			{
 				afterHide: function () {
 					media.stop();

@@ -2,5 +2,5 @@ plugin.description: File Manager media plugin.
 plugin.author: HWK
 plugin.version: 1.1
 rtorrent.remote: error
-rtorrent.external.error: php
+rtorrent.external.error: php,ffmpeg
 plugin.dependencies: filemanager
