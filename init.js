@@ -71,12 +71,15 @@ plugin.loadLang();
 	media.setDialogs = function(flmDialogs) {
 
 		var viewsPath = plugin.path + 'views/';
-
+        var endpoint = $type(plugin.config.public_endpoint) && plugin.config.public_endpoint !== ""
+            ? plugin.config.public_endpoint
+            : flm.utils.rtrim(window.location.href,'/') + '/'+ plugin.path + 'view.php';
+        
 		flm.views.namespaces['flm-media'] = viewsPath;
 
 		flmDialogs.forms['flm-media-player'] = {
 				options: {
-					public_endpoint: plugin.config.public_endpoint,
+					public_endpoint: endpoint,
 					views: "flm-media"
 				},
 				modal: false,
@@ -85,7 +88,7 @@ plugin.loadLang();
 
 		flmDialogs.forms['media-screenshots'] = {
 			options: {
-				public_endpoint: plugin.config.public_endpoint,
+				public_endpoint: endpoint,
 				views: "flm-media"
 			},
 			modal: true,
