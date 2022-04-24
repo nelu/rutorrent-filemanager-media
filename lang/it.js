@@ -1,8 +1,8 @@
-theUILang['flm_popup_flm-media-player'] =   'Media player';
-theUILang['flm_popup_media-screenshots'] =  'Screenshots';
-theUILang['flm_media_screens_file'] =       'Screenshots file';
-theUILang.flm_media_start_screenshots =	'Video screenshots creation started. Please wait this could take some time';
-theUILang.flm_media_screenshots = 'Video screenshots creation stopped';
+theUILang['flm_popup_flm-media-player'] =   'Lettore multimediale';
+theUILang['flm_popup_media-screenshots'] =  'Screenshot';
+theUILang['flm_media_screens_file'] =       'File degli screenshot';
+theUILang.flm_media_start_screenshots =	'Creazione screenshot avviata. Prego attendere, potrebbe volerci del tempo';
+theUILang.flm_media_screenshots = 'Creazione screenshot arrestata';
 
 
 thePlugins.get("filemanager-media").langLoaded();
