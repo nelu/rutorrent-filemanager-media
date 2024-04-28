@@ -1,7 +1,7 @@
 {% extends "flm::dialog-window.twig" %}
 
 {% block content %}
-<div style="max-width:720px;max-height:520px; overflow:scroll">
+<div style="max-width:720px;">
     <p>{{ basename(selectedTarget) }}</p>
 
     {% if not isImage %}
@@ -10,11 +10,14 @@
             Your browser does not support the video tag.
         </video>
     {%  else %}
-        <div style="min-height: 360px;">
-        <figure class="zoom" onmousemove="zoom(event)" style=" background-image: url('{{ public_endpoint }}/{{ selectedTarget }}')">
-            <img src="{{ public_endpoint }}/{{ selectedTarget }}" />
-        </figure>
+        <div style="max-height:520px; overflow:scroll">
+            <div style="min-height: 360px;">
+                <figure class="zoom" onmousemove="zoom(event)" style=" background-image: url('{{ public_endpoint }}/{{ selectedTarget }}')">
+                    <img src="{{ public_endpoint }}/{{ selectedTarget }}" />
+                </figure>
+            </div>
         </div>
+
     {% endif %}
 </div>
 {% endblock %}
@@ -53,8 +56,7 @@
     </script>
 
 {% endblock %}
+
 {% block buttons %}
-    <div class="aright buttons-list">
-        <input type="button" class="flm-diag-cancel Button" value="{{ closeButtonValue is defined ? closeButtonValue : theUILang.fDiagClose }}"/>
-    </div>
+
 {% endblock %}

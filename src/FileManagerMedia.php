@@ -22,11 +22,6 @@ class FileManagerMedia extends BaseController
         }
     }
 
-    public function createFileScreenshots($params)
-    {
-        return ['error' => 0, 'tmpdir' => 999];
-    }
-
     public function createFileScreenSheet($params)
     {
 
@@ -61,11 +56,16 @@ class FileManagerMedia extends BaseController
             'arg' => $params->to
         ];
 
-        $cmds = $screens->getSheetCmd();
-        $cmds[] = ' echo '.Helper::mb_escapeshellarg('✓ '.$params->to);
+        $screencmd = $screens->getSheetCmd()->cmd();
+
+        $cmds = [
+            "printf '%s' ".Helper::mb_escapeshellarg($params->target . ' -> '.$params->to . " ... "),
+            $screencmd,
+         "echo ✓"
+        ];
 
         return (new rTask($task_opts))
-            ->start($cmds, 0);
+            ->start($cmds, rTask::FLG_DEFAULT ^ rTask::FLG_ECHO_CMD);
 
     }
 

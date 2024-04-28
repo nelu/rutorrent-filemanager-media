@@ -43,9 +43,7 @@
     (function (global) {
         var dialogs = flm.ui.getDialogs();
         var diagId = dialogs.getDialogId();
-
-        // snapshot when trigerring
-        var currentPath = flm.getCurrentPath();
+        var pathBrowser = dialogs.pathBrowserInput(diagId);
         var ext = 'jpg';
 
         var sheet_settings = $(".flm-media-screensheet-settings");
@@ -55,24 +53,10 @@
         var screen_cols = $("#flm-settings-opt-sccols");
         var screen_width = $("#flm-settings-opt-scwidth");
 
-
-        var file  = flm.ui.browser.getSelectedEntry();
-        var fileName = flm.utils.basename(file);
-
-        var updateScreenshotFilepath = function (baseDir) {
-
-            var fileExt = flm.utils.getExt(fileName);
-            var fileNameNoExtension = flm.utils.stripFileExtension(fileName, [ext]);
-
-
-            var filePath = flm.utils.buildPath([baseDir, fileNameNoExtension]);
-
-            var screensFile = filePath+ '.' + ext;
-
-            dialogs.updateTargetPath(diagId, screensFile);
+        var updateFilePath = function (path, forceExtension = true) {
+            let filePath = flm.utils.replaceFilePath(path.val(), path.data('previousValue'), ext, forceExtension ? ext : false);
+            dialogs.updateTargetPath(diagId, filePath);
         };
-
-        updateScreenshotFilepath(flm.utils.basedir(file));
 
         dialogs.onStart(function () {
             var source = $(".flm-diag-nav-path-screens-source").text();
@@ -92,13 +76,15 @@
                 : flm.media.doScreenshots(source, dialogs.getTargetPath(diagId));
         });
 
-        $(diagId + ' .flm-diag-nav-path').change(function (event) {
-            updateScreenshotFilepath(event.target.value);
+        dialogs.pathBrowserInput(diagId).change(function (event) {
+            updateFilePath($(this));
         });
 
         type.change(function () {
             $(this).val() === 'sheet' && sheet_settings.show() || sheet_settings.hide();
-        });
+        })
+
+        updateFilePath(pathBrowser, true);
 
     })(window);
 </script>

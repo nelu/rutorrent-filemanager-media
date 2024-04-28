@@ -9,6 +9,7 @@ use FileUtil;
 use Flm\Filesystem as Fs;
 use Flm\Helper;
 use Flm\RemoteShell;
+use Flm\ShellCmd;
 use rTask;
 use rXMLRPCCommand;
 use Utility;
@@ -19,6 +20,8 @@ class Screenshots
     protected $config = [];
     protected $videoFile;
     protected $output;
+
+    public array $videoInfo;
 
     const DEFAULT_SHEET_CONFIG = ['rows' => '6', 'columns' => 4, 'width' => 480];
 
@@ -42,25 +45,41 @@ class Screenshots
         }
     }
 
-    public function getSheetCmd()
+    public function getSheetCmd() : ShellCmd
     {
         $vinfo = self::videoInfo($this->videoFile);
+
+        $this->videoInfo = $vinfo;
 
         $frame_step = floor($vinfo['total_frames'] / ($this->config['rows'] * $this->config['columns']));
 
         $this->config['frame_step'] = $frame_step;
 
-        $params = (object)[
-            'imgfile' => $this->output,
-            'file' => $this->videoFile,
-            'options' => (object)$this->config,
-            'binary' => Utility::getExternal('ffmpeg')
-        ];
+        $params =  (object)$this->config;
+        $params->imgfile = $this->output;
+        $params->file = $this->videoFile;
+        $params->binary = Utility::getExternal('ffmpeg');
 
-        $cmd = self::ffmpegScreensheetCmd($params);
 
-        return [$cmd];
+        /*        $video_file = Helper::mb_escapeshellarg($params->file);
+                $screenfile = Helper::mb_escapeshellarg($params->imgfile);*/
 
+        $filters = 'drawtext="timecode=\'00\:00\:00\:00\' :box=1 :boxcolor=black :boxborderw=5 :fontcolor=white :rate=30 :fontsize=ceil(6.1/100*h) :shadowcolor=white :x=0 :y=0",' .
+            'scale="' . $params->width . ':-1",' .
+            'select="not(mod(n\,' . $params->frame_step . '))",'.
+            'tile="' . $params->columns . 'x' . $params->rows . ':padding=3:margin=2"';
+
+        // return "{$params->binary} -i {$video_file} -an -vf {$filters} -vsync 0 -frames:v 1 -qscale:v 3 {$screenfile}";
+
+        return ShellCmd::bin($params->binary,
+            [   '-i ' => $params->file,
+                '-an',
+                '-vf '. $filters => true,
+                '-vsync '=> 0,
+                '-frames:v '=> 1,
+                '-qscale:v ' => 3,
+                $params->imgfile
+            ]);
     }
 
     /**
@@ -70,16 +89,15 @@ class Screenshots
      */
     public static function videoInfo($video_file)
     {
-
-        $video_file = Helper::mb_escapeshellarg($video_file);
-
         $args = ['-v', 0, '-show_format', '-show_streams', '-print_format', 'json', '-i', $video_file];
+        $ffprobe = ShellCmd::bin(Utility::getExternal("ffprobe"), $args);
 
-        if (!($info = RemoteShell::get()->execOutput(Utility::getExternal("ffprobe"), $args))) {
+        $result = $ffprobe->runRemote();
+        if ($result[0] != 0) {
             throw new Exception("Current ffmpeg/ffprobe not supported. Please compile a newer version.", 4);
         }
 
-        $vinfo = json_decode(stripslashes(implode("\n", $info)), true);
+        $vinfo = json_decode(stripslashes(implode("\n", $result[1])), true);
 
         $video_stream = null;
         $video['stream_id'] = 0;
@@ -107,11 +125,12 @@ class Screenshots
 
             $args = ['-v', 0, '-show_streams', '-print_format', 'json', '-count_frames', '-i', $video_file];
 
-            if (!($info = RemoteShell::get()->execOutput(Utility::getExternal("ffprobe"), $args))) {
+            $result = $ffprobe->setArgs($args)->runRemote();
+            if ($result[0] != 0) {
                 throw new Exception("Current ffmpeg/ffprobe not supported. Please compile a newer version.", 4);
             }
 
-            $vinfo = json_decode(stripslashes(implode("\n", $info)), true);
+            $vinfo = json_decode(stripslashes(implode("\n", $result[1])), true);
 
             if (!isset($vinfo['streams'][$video['stream_id']])) {
                 throw new Exception("Invalid video file: " . $video_file, 4);
@@ -121,23 +140,8 @@ class Screenshots
 
         }
 
+        $video['info'] = $vinfo;
+
         return $video;
-
     }
-
-    public static function ffmpegScreensheetCmd($params)
-    {
-
-        $options = $params->options;
-        $video_file = Helper::mb_escapeshellarg($params->file);
-        $screenfile = Helper::mb_escapeshellarg($params->imgfile);
-
-        $filters = 'drawtext="timecode=\'00\:00\:00\:00\' :box=1 :boxcolor=black :boxborderw=5 :fontcolor=white :rate=30 :fontsize=ceil(6.1/100*h) :shadowcolor=white :x=0 :y=0",' .
-            'scale="' . $options->width . ':-1",' .
-            'select="not(mod(n\,' . $options->frame_step . '))",'.
-            'tile="' . $options->columns . 'x' . $options->rows . ':padding=3:margin=2"';
-
-        return "{$params->binary} -i {$video_file} -an -vf {$filters} -vsync 0 -frames:v 1 -qscale:v 3 {$screenfile}";
-    }
-
 }
