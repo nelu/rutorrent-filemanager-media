@@ -43,7 +43,7 @@
     (function (global) {
         var dialogs = flm.ui.getDialogs();
         var diagId = dialogs.getDialogId();
-        var pathBrowser = dialogs.pathBrowserInput(diagId);
+        var pathBrowser = dialogs.dirBrowserInput(diagId);
         var ext = 'jpg';
 
         var sheet_settings = $(".flm-media-screensheet-settings");
@@ -76,7 +76,7 @@
                 : flm.media.doScreenshots(source, dialogs.getTargetPath(diagId));
         });
 
-        dialogs.pathBrowserInput(diagId).change(function (event) {
+        dialogs.dirBrowserInput(diagId).change(function (event) {
             updateFilePath($(this));
         });
 
