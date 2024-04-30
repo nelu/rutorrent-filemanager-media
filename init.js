@@ -11,7 +11,8 @@ plugin.loadLang();
     };
 
     media.onTaskDone = function (task) {
-        flm.Refresh(task.params.workdir);
+        task.params && task.params.workdir === flm.getCurrentPath()
+        && flm.Refresh();
     };
 
     media.play = function (target) {
