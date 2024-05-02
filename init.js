@@ -3,16 +3,13 @@ plugin = plugin || {}; // shut up
 plugin.loadLang();
 
 
-(function flmMedia(window) {
+(function flmMedia(global) {
 
     var media = {
         stp: 'plugins/mediastream/view.php',
-        api: null
-    };
-
-    media.onTaskDone = function (task) {
-        task.params && task.params.workdir === flm.getCurrentPath()
-        && flm.Refresh();
+        api: null,
+        destinationPath: null,
+        onTaskDone: $.Deferred()
     };
 
     media.play = function (target) {
@@ -53,7 +50,7 @@ plugin.loadLang();
     };
 
     media.doScreensheet = function (sourceFile, screenShotFileName, config) {
-        var def = $.Deferred()
+        media.onTaskDone = $.Deferred()
         theWebUI.startConsoleTask("screensheet", plugin.name,
             {
                 workdir: flm.getCurrentPath(),
@@ -64,8 +61,7 @@ plugin.loadLang();
             },
             {noclose: true});
 
-        def.resolve(theWebUI.getConsoleTask());
-        return def.promise();
+        return media.onTaskDone.promise();
     };
 
     media.setDialogs = function (flmDialogs) {
@@ -164,11 +160,23 @@ plugin.loadLang();
 
 plugin.onLangLoaded = function () {
     plugin.markLoaded();
-
 };
 
 plugin.onTaskFinished = function (task, onBackground) {
-    window.flm.media.onTaskDone(task)
+    //console.log('onTaskFinished screenshots ready', task, flm.media.destinationPath);
+
+    flm.media.onTaskDone.resolve(task);
+    let destination = flm.media.destinationPath;
+    self.noty = $.noty(
+        {
+            text: theUILang.flm_media_screens_file
+                + ': <a href="javascript: flm.showPath(\''+flm.utils.basedir(destination)+'\', \''+flm.utils.basename(destination)+'\')">'
+                + destination + '</a>',
+            layout: 'bottomLeft',
+            type: 'success',
+            timeout: 10000,
+            closeOnSelfClick: true
+        });
 
     if (task.errors === 0) {
         // log the request error as task errors
