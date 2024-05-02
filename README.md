@@ -4,7 +4,7 @@ A plugin which extends filemanager functionality by adding media view capabiliti
 #### Media features for filemanager plugin which include:
 - audio/video player for common media formats: mp3|mp4|avi|divx|mkv (browser dependent)
 - image viewer with zoom support
-- create video [screenshots functionality](https://github.com/nelu/rutorrent-filemanager-media/assets/3987091/1ffee760-aac5-443c-86e9-68a01353d2b7): tile mosaic
+- create video [screenshots functionality](https://github.com/nelu/rutorrent-filemanager-media/wiki): tile mosaic
 
 #### Settings available in the screenshot dialog:
  - Screens rows: number of thumbnail rows in the output screensheet 
