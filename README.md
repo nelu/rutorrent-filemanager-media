@@ -11,7 +11,7 @@ A plugin which extends filemanager functionality by adding media view capabiliti
  - Screens columns: number of thumbnail columns in the output screensheet 
  - Thumbnail width: the width of each cell in the screensheet tile
 
-![ffmpeg-screenshots](https://github.com/nelu/rutorrent-filemanager-media/assets/3987091/1ffee760-aac5-443c-86e9-68a01353d2b7)
+![ffmpeg-screenshots](https://github.com/nelu/rutorrent-filemanager-media/assets/3987091/ae027bbf-3f23-48a4-9f90-d3b645de971d)
 
 #### Plugin configuration
 All configuration options reside in `conf.php`:
