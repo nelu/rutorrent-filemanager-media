@@ -74,8 +74,7 @@
                                 rows: screen_rows.val(),
                                 columns: screen_cols.val(),
                                 width: screen_width.val()
-                            }
-                        )
+                            })
                         : flm.media.doScreenshots(source, destination)
                 ).then(function (task) {
                     // call will never execute when closing dialog

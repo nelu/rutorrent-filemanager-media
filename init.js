@@ -17,12 +17,11 @@ plugin.loadLang();
         var ext = flm.utils.getExt(target);
 
         flm.ui.dialogs.forms['flm-media-player'].options.isImage = ext.match(new RegExp('^(' + plugin.config.allowedFormats.image + ')$', "i"));
-        flm.ui.dialogs.showDialog('flm-media-player',
-            {
-                afterHide: function () {
-                    media.stop();
-                }
-            });
+        flm.ui.dialogs.showDialog('flm-media-player', {
+            afterHide: function () {
+                media.stop();
+            }
+        });
     };
 
     media.getVideoPlayer = function () {
@@ -39,10 +38,7 @@ plugin.loadLang();
     media.doScreenshots = function (sourceFile, screenShotFileName) {
 
         return this.api.post({
-            workdir: flm.getCurrentPath(),
-            method: 'createFileScreenshots',
-            target: sourceFile,
-            to: screenShotFileName
+            workdir: flm.getCurrentPath(), method: 'createFileScreenshots', target: sourceFile, to: screenShotFileName
         }).then(function (value) {
             //flm.manager.logAction(theUILang["flm_popup_media-screenshots"], theUILang.flm_media_start_screenshots);
         });
@@ -51,15 +47,13 @@ plugin.loadLang();
 
     media.doScreensheet = function (sourceFile, screenShotFileName, config) {
         media.onTaskDone = $.Deferred()
-        theWebUI.startConsoleTask("screensheet", plugin.name,
-            {
-                workdir: flm.getCurrentPath(),
-                method: 'createFileScreenSheet',
-                target: sourceFile,
-                to: screenShotFileName,
-                settings: config
-            },
-            {noclose: true});
+        theWebUI.startConsoleTask("screensheet", plugin.name, {
+            workdir: flm.getCurrentPath(),
+            method: 'createFileScreenSheet',
+            target: sourceFile,
+            to: screenShotFileName,
+            settings: config
+        }, {noclose: true});
 
         return media.onTaskDone.promise();
     };
@@ -67,29 +61,20 @@ plugin.loadLang();
     media.setDialogs = function (flmDialogs) {
 
         var viewsPath = plugin.path + 'views/';
-        var endpoint = $type(plugin.config.public_endpoint) && plugin.config.public_endpoint !== ""
-            ? plugin.config.public_endpoint
-            : flm.utils.rtrim(window.location.href, '/') + '/' + plugin.path + 'view.php';
+        var endpoint = $type(plugin.config.public_endpoint) && plugin.config.public_endpoint !== "" ? plugin.config.public_endpoint : flm.utils.rtrim(window.location.href, '/') + '/' + plugin.path + 'view.php';
 
         flm.views.namespaces['flm-media'] = viewsPath;
 
         flmDialogs.forms['flm-media-player'] = {
             options: {
-                public_endpoint: endpoint,
-                views: "flm-media"
-            },
-            modal: false,
-            template: viewsPath + "dialog-media-player"
+                public_endpoint: endpoint, views: "flm-media"
+            }, modal: false, template: viewsPath + "dialog-media-player"
         };
 
         flmDialogs.forms['media-screenshots'] = {
             options: {
-                public_endpoint: endpoint,
-                views: "flm-media"
-            },
-            modal: true,
-            pathbrowse: true,
-            template: viewsPath + "dialog-screenshots"
+                public_endpoint: endpoint, views: "flm-media"
+            }, modal: true, pathbrowse: true, template: viewsPath + "dialog-screenshots"
         };
     };
 
@@ -118,16 +103,15 @@ plugin.loadLang();
                     var createPos = thePlugins.get('filemanager').ui.getContextMenuEntryPosition(menu, theUILang.fcreate, 1);
 
                     if (createPos > -1) {
-                        menu[createPos][2].push([theUILang['flm_popup_media-screenshots'], (
-                            thePlugins.isInstalled('screenshots')
-                            && !flm.utils.isDir(path)
-                            && flm.utils.getExt(path).match(new RegExp("^(" + thePlugins.get('screenshots').extensions.join('|') + ")$", "i"))
-                        )
+                        menu[createPos][2].push([theUILang['flm_popup_media-screenshots'],
+                            (thePlugins.isInstalled('screenshots')
+                                && !flm.utils.isDir(path)
+                                && flm.utils.getExt(path)
+                                    .match(new RegExp("^(" + thePlugins.get('screenshots').extensions.join('|') + ")$", "i")))
 
                             ? function () {
                                 flm.ui.getDialogs().showDialog('media-screenshots');
-                            }
-                            : null]);
+                            } : null]);
                     }
 
                 }
@@ -144,16 +128,12 @@ plugin.loadLang();
 
     //onSetEntryMenu
     thePlugins.get('filemanager').ui.readyPromise
-        .then(
-            function (flmUi) {
-                media.init();
+        .then(function () {
+            media.init();
+            window.flm.media = media;
+        }, function (reason) {
 
-                window.flm.media = media;
-            },
-            function (reason) {
-
-            }
-        );
+        });
 
 })(window);
 
@@ -163,20 +143,17 @@ plugin.onLangLoaded = function () {
 };
 
 plugin.onTaskFinished = function (task, onBackground) {
-    //console.log('onTaskFinished screenshots ready', task, flm.media.destinationPath);
-
     flm.media.onTaskDone.resolve(task);
     let destination = flm.media.destinationPath;
-    self.noty = $.noty(
-        {
-            text: theUILang.flm_media_screens_file
-                + ': <a href="javascript: flm.showPath(\''+flm.utils.basedir(destination)+'\', \''+flm.utils.basename(destination)+'\')">'
-                + destination + '</a>',
-            layout: 'bottomLeft',
-            type: 'success',
-            timeout: 10000,
-            closeOnSelfClick: true
-        });
+    plugin.noty = $.noty({
+        text: theUILang.flm_media_screens_file
+            + ': <a href="javascript: flm.showPath(\'' + flm.utils.basedir(destination) + '\', \''
+            + flm.utils.basename(destination) + '\')">' + destination + '</a>',
+        layout: 'bottomLeft',
+        type: 'success',
+        timeout: 10000,
+        closeOnSelfClick: true
+    });
 
     if (task.errors === 0) {
         // log the request error as task errors
