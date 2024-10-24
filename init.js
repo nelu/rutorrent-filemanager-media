@@ -13,15 +13,19 @@ plugin.loadLang();
     };
 
     media.play = function (target) {
+        const ext = flm.utils.getExt(target);
+        let diagConf = flm.ui.dialogs.getDialogConfig('flm-media-player');
 
-        var ext = flm.utils.getExt(target);
+        diagConf.options.isImage = ext.match(
+            new RegExp('^(' + plugin.config.allowedFormats.image + ')$', "i")
+        );
 
-        flm.ui.dialogs.forms['flm-media-player'].options.isImage = ext.match(new RegExp('^(' + plugin.config.allowedFormats.image + ')$', "i"));
-        flm.ui.dialogs.showDialog('flm-media-player', {
-            afterHide: function () {
-                media.stop();
-            }
-        });
+        flm.ui.dialogs.setDialogConfig('flm-media-player', diagConf)
+            .showDialog('flm-media-player', {
+                afterHide: function () {
+                    media.stop();
+                }
+            });
     };
 
     media.getVideoPlayer = function () {
@@ -65,17 +69,23 @@ plugin.loadLang();
 
         flm.views.namespaces['flm-media'] = viewsPath;
 
-        flmDialogs.forms['flm-media-player'] = {
-            options: {
-                public_endpoint: endpoint, views: "flm-media"
-            }, modal: false, template: viewsPath + "dialog-media-player"
-        };
+        flm.ui.dialogs.setDialogConfig('flm-media-player', {
+                options: {
+                    public_endpoint: endpoint, views: "flm-media"
+                },
+                modal: false,
+                template: viewsPath + "dialog-media-player"
+            })
+            .setDialogConfig('media-screenshots', {
+                options: {
+                    public_endpoint: endpoint,
+                    views: "flm-media"
+                },
+                modal: true,
+                pathbrowse: true,
+                template: viewsPath + "dialog-screenshots"
+            });
 
-        flmDialogs.forms['media-screenshots'] = {
-            options: {
-                public_endpoint: endpoint, views: "flm-media"
-            }, modal: true, pathbrowse: true, template: viewsPath + "dialog-screenshots"
-        };
     };
 
     media.setMenuEntries = function (menu, path) {
@@ -109,9 +119,9 @@ plugin.loadLang();
                                 && flm.utils.getExt(path)
                                     .match(new RegExp("^(" + thePlugins.get('screenshots').extensions.join('|') + ")$", "i")))
 
-                            ? function () {
-                                flm.ui.getDialogs().showDialog('media-screenshots');
-                            } : null]);
+                                ? function () {
+                                    flm.ui.getDialogs().showDialog('media-screenshots');
+                                } : null]);
                     }
 
                 }
