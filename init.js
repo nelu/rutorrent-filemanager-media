@@ -132,7 +132,7 @@ plugin.loadLang();
     };
 
     media.init = function () {
-        window.flm.ui.browser.onSetEntryMenu(media.setMenuEntries);
+        window.flm.ui.filenav.onSetEntryMenu(media.setMenuEntries);
         media.setDialogs(flm.ui.getDialogs());
     };
 
