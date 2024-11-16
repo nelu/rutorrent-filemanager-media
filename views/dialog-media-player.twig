@@ -1,10 +1,13 @@
 {% extends "flm::dialog-window.twig" %}
 
 {% block content %}
-<div style="max-width:720px;">
-    <p>{{ basename(selectedTarget) }}</p>
+    {{ window.pathBrowser(basename(selectedTarget), 'File', "", "disabled readonly") }}
+
+    <div style=" resize: both;
+    overflow: auto; min-width: 480px;" class="ratio ratio-16x9" >
 
     {% if not isImage %}
+
         <video width="100%" height="auto" controls>
             <source src="{{ public_endpoint }}/{{ selectedTarget }}" type="video/mp4">
             Your browser does not support the video tag.

@@ -4,7 +4,7 @@
 // change only if you use web AUTH
 // example: http://mydomain.com/stream/view.php
 // $streampath = '/plugins/filemanager-media/view.php';
-$streampath = '';
+$streampath = './plugins/filemanager-media/view.php';
 
 
 // regex file extensions
