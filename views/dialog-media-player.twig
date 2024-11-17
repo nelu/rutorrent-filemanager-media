@@ -4,61 +4,16 @@
     {{ window.pathBrowser(basename(selectedTarget), 'File', "", "disabled readonly") }}
 
     <div style=" resize: both;
-    overflow: auto; min-width: 480px;" class="ratio ratio-16x9" >
-
-    {% if not isImage %}
-
+    overflow: auto; min-width: 480px;" id="flm-media-player" class="ratio ratio-16x9" >
         <video width="100%" height="auto" controls>
             <source src="{{ public_endpoint }}/{{ selectedTarget }}" type="video/mp4">
             Your browser does not support the video tag.
         </video>
-    {%  else %}
-        <div style="max-height:520px; overflow:scroll">
-            <div style="min-height: 360px;">
-                <figure class="zoom" onmousemove="zoom(event)" style=" background-image: url('{{ public_endpoint }}/{{ selectedTarget }}')">
-                    <img src="{{ public_endpoint }}/{{ selectedTarget }}" />
-                </figure>
-            </div>
-        </div>
-
-    {% endif %}
-</div>
+    </div>
 {% endblock %}
 {% block scripts %}
-    <style>
-        figure.zoom {
-            background-position: 50% 50%;
-            position: relative;
-            width: 500px;
-            overflow: hidden;
-            cursor: zoom-in;
-        }
-        figure.zoom img:hover {
-            opacity: 0;
-        }
-        figure.zoom img {
-            transition: opacity .5s;
-            display: block;
-            width: 100%;
-        }
-    </style>
     <script>
-        var offsetX, offsetY;
-        offsetX = offsetY = 0;
-
-        function zoom(e)
-        {
-                var zoomer = e.currentTarget;
-                $type(e.offsetX) ? offsetX = e.offsetX : offsetX = e.touches[0].pageX;
-                $type(e.offsetY) ? offsetY = e.offsetY : offsetX = e.touches[0].pageX;
-                var x = offsetX/zoomer.offsetWidth*100;
-                var y = offsetY/zoomer.offsetHeight*100;
-                zoomer.style.backgroundPosition = x + '% ' + y + '%';
-
-        }
-
-        $('video').on('enterpictureinpicture', function() {console.log('in pip mode');})
-
+        $('#flm-media-player video').on('enterpictureinpicture', function() {console.log('in pip mode');})
     </script>
 
 {% endblock %}

@@ -1,0 +1,54 @@
+{% extends "flm::dialog-window.twig" %}
+
+{% block content %}
+    {{ window.pathBrowser(basename(selectedTarget), 'File', "", "disabled readonly") }}
+
+    <div style=" resize: both; overflow: auto; min-height:480px; max-height: 700px; min-width: 700px;" class="ratio" >
+        <div style="min-height:480px; overflow:scroll">
+            <figure class="zoom" onmousemove="zoom(event)" style="
+                    width: 100%;
+                    background-image: url('{{ public_endpoint }}/{{ selectedTarget }}')">
+                <img src="{{ public_endpoint }}/{{ selectedTarget }}" />
+            </figure>
+        </div>
+    </div>
+{% endblock %}
+{% block scripts %}
+    <style>
+        figure.zoom {
+            background-position: 50% 50%;
+            position: relative;
+            width: 500px;
+            overflow: hidden;
+            cursor: zoom-in;
+        }
+        figure.zoom img:hover {
+            opacity: 0;
+        }
+        figure.zoom img {
+            transition: opacity .5s;
+            display: block;
+            width: 100%;
+        }
+    </style>
+    <script>
+        var offsetX, offsetY;
+        offsetX = offsetY = 0;
+
+        function zoom(e)
+        {
+                var zoomer = e.currentTarget;
+                $type(e.offsetX) ? offsetX = e.offsetX : offsetX = e.touches[0].pageX;
+                $type(e.offsetY) ? offsetY = e.offsetY : offsetX = e.touches[0].pageX;
+                var x = offsetX/zoomer.offsetWidth*100;
+                var y = offsetY/zoomer.offsetHeight*100;
+                zoomer.style.backgroundPosition = x + '% ' + y + '%';
+
+        }
+    </script>
+
+{% endblock %}
+
+{% block buttons %}
+
+{% endblock %}

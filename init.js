@@ -14,22 +14,21 @@ plugin.loadLang();
 
     media.play = function (target) {
         const ext = flm.utils.getExt(target);
-        let diagConf = flm.ui.dialogs.getDialogConfig('flm-media-player');
-
-        diagConf.options.isImage = ext.match(
+        const isImage = ext.match(
             new RegExp('^(' + plugin.config.allowedFormats.image + ')$', "i")
         );
+        let mediaDialog = isImage ? 'media-image-view' : 'media-player'
+        let diagConf = flm.ui.dialogs.getDialogConfig(mediaDialog);
 
-        flm.ui.dialogs.setDialogConfig('flm-media-player', diagConf)
-            .showDialog('flm-media-player', {
-                afterHide: function () {
-                    media.stop();
-                }
-            });
+        diagConf.options.isImage = mediaDialog;
+
+        flm.ui.dialogs
+            .setDialogConfig(mediaDialog, diagConf)
+            .showDialog(mediaDialog, {afterHide: () => !isImage && media.stop()});
     };
 
     media.getVideoPlayer = function () {
-        var diagId = flm.ui.getDialogs().getDialogId('flm-media-player');
+        var diagId = flm.ui.getDialogs().getDialogId('media-player');
         return $(diagId).find('video');
     };
 
@@ -69,12 +68,21 @@ plugin.loadLang();
 
         flm.views.namespaces['flm-media'] = viewsPath;
 
-        flm.ui.dialogs.setDialogConfig('flm-media-player', {
+        flm.ui.dialogs.setDialogConfig('media-player', {
                 options: {
-                    public_endpoint: endpoint, views: "flm-media"
+                    public_endpoint: endpoint,
+                    views: "flm-media"
                 },
                 modal: false,
                 template: viewsPath + "dialog-media-player"
+            })
+            .setDialogConfig('media-image-view', {
+                options: {
+                    public_endpoint: endpoint,
+                    views: "flm-media"
+                },
+                modal: false,
+                template: viewsPath + "dialog-image-view"
             })
             .setDialogConfig('media-screenshots', {
                 options: {
