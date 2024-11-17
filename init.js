@@ -1,35 +1,22 @@
 plugin = plugin || {}; // shut up
+plugin.flmMedia = function () {
 
-plugin.loadLang();
-
-
-(function flmMedia(global) {
-
-    var media = {
-        stp: 'plugins/mediastream/view.php',
-        api: null,
-        destinationPath: null,
-        onTaskDone: $.Deferred()
-    };
+    let media = this;
+    media.stp = 'plugins/mediastream/view.php';
+    media.api = null;
+    media.destinationPath =  null;
+    media.onTaskDone =  $.Deferred();
 
     media.play = function (target) {
         const ext = flm.utils.getExt(target);
-        const isImage = ext.match(
-            new RegExp('^(' + plugin.config.allowedFormats.image + ')$', "i")
-        );
-        let mediaDialog = isImage ? 'media-image-view' : 'media-player'
-        let diagConf = flm.ui.dialogs.getDialogConfig(mediaDialog);
-
-        diagConf.options.isImage = mediaDialog;
-
-        flm.ui.dialogs
-            .setDialogConfig(mediaDialog, diagConf)
-            .showDialog(mediaDialog, {afterHide: () => !isImage && media.stop()});
+        const isImage = ext.match(new RegExp('^(' + plugin.config.allowedFormats.image + ')$', "i"));
+        flm.ui.dialogs.showDialog(isImage ? 'media-image-view' : 'media-player',
+            {afterHide: () => !isImage && media.stop()});
     };
 
     media.getVideoPlayer = function () {
         var diagId = flm.ui.getDialogs().getDialogId('media-player');
-        return $(diagId).find('video');
+        return $(diagId + " video");
     };
 
     media.stop = function () {
@@ -144,20 +131,20 @@ plugin.loadLang();
         media.setDialogs(flm.ui.getDialogs());
     };
 
-    //onSetEntryMenu
-    thePlugins.get('filemanager').ui.readyPromise
-        .then(function () {
-            media.init();
-            window.flm.media = media;
-        }, function (reason) {
-
-        });
-
-})(window);
+    return media;
+}
 
 
 plugin.onLangLoaded = function () {
-    plugin.markLoaded();
+    //onSetEntryMenu
+    thePlugins.get('filemanager').ui.readyPromise
+        .then(function () {
+            flm.media = plugin.flmMedia();
+            flm.media.init();
+            plugin.markLoaded();
+        }, function (reason) {
+            console.error("filemanager-media: base plugin failed to load", reason);
+        });
 };
 
 plugin.onTaskFinished = function (task, onBackground) {
@@ -188,5 +175,5 @@ plugin.onTaskFinished = function (task, onBackground) {
 	theWebUI.VPLAY.stop();
 	$('#VPLAY_diag').remove();
 }*/
-
+plugin.loadLang();
 plugin.loadCSS('media');
