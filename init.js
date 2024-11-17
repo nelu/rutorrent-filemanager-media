@@ -147,28 +147,26 @@ plugin.flmMedia = function () {
 
 plugin.onLangLoaded = function () {
     //onSetEntryMenu
-    thePlugins.get('filemanager').ui.readyPromise
-        .then(function () {
+    thePlugins.get('filemanager').ready()
+        .then(function (r) {
             flm.media = plugin.flmMedia();
             flm.media.init();
             plugin.markLoaded();
+            return r;
         }, function (reason) {
             console.error("filemanager-media: base plugin failed to load", reason);
+            return reason;
         });
 };
 
 plugin.onTaskFinished = function (task, onBackground) {
     flm.media.onTaskDone.resolve(task);
     let destination = flm.media.destinationPath;
-    plugin.noty = $.noty({
-        text: theUILang.flm_media_screens_file
-            + ': <a href="javascript: flm.showPath(\'' + flm.utils.basedir(destination) + '\', \''
-            + flm.utils.basename(destination) + '\')">' + destination + '</a>',
-        layout: 'bottomLeft',
-        type: 'success',
-        timeout: 10000,
-        closeOnSelfClick: true
-    });
+
+    const text = `${theUILang.flm_media_screens_file}: <a href="javascript: flm.showPath('${flm.utils.basedir(destination)}',`
+    + `'${flm.utils.basename(destination)}')">${destination}</a>`;
+
+    flm.actions.notify(text, 'success');
 
     if (task.errors === 0) {
         // log the request error as task errors
