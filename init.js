@@ -20,7 +20,6 @@ plugin.flmMedia = function () {
     };
 
     media.stop = function () {
-
         var player = media.getVideoPlayer();
         player.length > 0 && player[0].pause();
     };
@@ -35,17 +34,28 @@ plugin.flmMedia = function () {
 
     };
 
-    media.doScreensheet = function (sourceFile, screenShotFileName, config) {
+    media.doScreensheet = function (sourceFile, screenshotFile, config) {
         media.onTaskDone = $.Deferred()
-        theWebUI.startConsoleTask("screensheet", plugin.name, {
-            workdir: flm.getCurrentPath(),
-            method: 'createFileScreenSheet',
-            target: sourceFile,
-            to: screenShotFileName,
-            settings: config
-        }, {noclose: true});
+        screenshotFile = flm.stripJailPath(screenshotFile);
+        flm.media.destinationPath = screenshotFile;
 
-        return media.onTaskDone.promise();
+        if('sheet' === 'sheet')
+        {
+            theWebUI.startConsoleTask("screensheet", plugin.name, {
+                workdir: flm.getCurrentPath(),
+                method: 'createFileScreenSheet',
+                target: sourceFile,
+                to: screenshotFile,
+                settings: config
+            }, {noclose: true});
+        } else {
+            flm.media.doScreenshots(sourceFile, screenshotFile)
+        }
+
+        return media.onTaskDone.promise().then(function (task) {
+                flm.actions.refreshIfCurrentPath(flm.utils.basedir(screenshotFile));
+                return task;
+        });
     };
 
     media.setDialogs = function (flmDialogs) {
