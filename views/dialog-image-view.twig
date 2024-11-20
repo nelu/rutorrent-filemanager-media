@@ -2,13 +2,12 @@
 
 {% block content %}
     {{ window.pathBrowser(basename(selectedTarget), 'File', "", "disabled readonly") }}
-
-    <div style=" resize: both; overflow: auto; min-height:480px; max-height: 700px; min-width: 700px;" class="ratio" >
-        <div style="min-height:480px; overflow:scroll">
+    <div class="ratio" style="resize: both; overflow: auto; min-height:480px; max-height: 700px; min-width: 700px;">
+        <div class="flm-media-image-viewer" style="min-height:480px; overflow:scroll">
             <figure class="zoom" onmousemove="zoom(event)" style="
                     width: 100%;
-                    background-image: url('{{ public_endpoint }}/{{ selectedTarget }}')">
-                <img src="{{ public_endpoint }}/{{ selectedTarget }}" />
+                    background-image: url('{{ mediaEntry.file  }}')">
+                <img src="{{ mediaEntry.file  }}" />
             </figure>
         </div>
     </div>
@@ -43,8 +42,16 @@
                 var x = offsetX/zoomer.offsetWidth*100;
                 var y = offsetY/zoomer.offsetHeight*100;
                 zoomer.style.backgroundPosition = x + '% ' + y + '%';
-
         }
+
+        flm.media.onPlayMedia((e, mediaEntry) => {
+            if(mediaEntry.isImage)
+            {
+                let viewer = $(".flm-media-image-viewer");
+                viewer.find('img').attr('src', mediaEntry.file);
+                viewer.find('figure').css('background-image', `url(${mediaEntry.file})`);
+            }
+        });
     </script>
 
 {% endblock %}

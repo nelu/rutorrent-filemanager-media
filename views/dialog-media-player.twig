@@ -2,18 +2,23 @@
 
 {% block content %}
     {{ window.pathBrowser(basename(selectedTarget), 'File', "", "disabled readonly") }}
-
-    <div style=" resize: both;
-    overflow: auto; min-width: 480px;" id="flm-media-player" class="ratio ratio-16x9" >
-        <video width="100%" height="auto" controls>
-            <source src="{{ public_endpoint }}/{{ selectedTarget }}" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
+    <hr class="m-0">
+    <div class="row">
+        <div class="flm-media-player flm-media-player-{{ mediaEntry.type }} ratio {{ mediaEntry.type == "video" ? "ratio-16x9" : "" }}"
+             style="resize: both; overflow: auto; min-width: 480px;" >
+            <video width="100%" height="auto" class="ratio ratio-16x9" controls>
+                <source src="{{ mediaEntry.file }}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
     </div>
 {% endblock %}
 {% block scripts %}
     <script>
-        $('#flm-media-player video').on('enterpictureinpicture', function() {console.log('in pip mode');})
+        (() => {
+            flm.media.getVideoPlayer().on('enterpictureinpicture', () => $(this).data.inPipMode=true)
+                .on('leavepictureinpicture', () => $(this).data.inPipMode=false);
+        })(window);
     </script>
 
 {% endblock %}

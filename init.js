@@ -1,27 +1,64 @@
 plugin = plugin || {}; // shut up
 plugin.flmMedia = function () {
 
+    let config = plugin.config;
+    let dialogs = flm.ui.getDialogs();
+
+    this.EVENT_PLAY = 'flm-media:playfile';
+    this.endpoint = $type(config.public_endpoint) && config.public_endpoint !== ""
+        ? config.public_endpoint
+        : flm.utils.rtrim(window.location.href, '/') + '/' + plugin.path + 'view.php';
+    this.api = null;
+    this.destinationPath = null;
+    this.onTaskDone = $.Deferred();
+
     let media = this;
-    media.stp = 'plugins/mediastream/view.php';
-    media.api = null;
-    media.destinationPath =  null;
-    media.onTaskDone =  $.Deferred();
 
-    media.play = function (target) {
-        const ext = flm.utils.getExt(target);
-        const isImage = ext.match(new RegExp('^(' + plugin.config.allowedFormats.image + ')$', "i"));
-        flm.ui.dialogs.showDialog(isImage ? 'media-image-view' : 'media-player',
-            {afterHide: () => !isImage && media.stop()});
+    this.play = function (target) {
+        let mediaEntry = this.mediaEntryFrom(target);
+        let contentTypePlayer = mediaEntry.isImage ? $(".flm-media-image-viewer") : this.getVideoPlayer();
+
+        contentTypePlayer.length
+        && $(document).trigger(this.EVENT_PLAY, [mediaEntry])
+        || this.showPlayer(mediaEntry);
     };
 
-    media.getVideoPlayer = function () {
-        var diagId = flm.ui.getDialogs().getDialogId('media-player');
-        return $(diagId + " video");
+    this.onPlayMedia = (call) => {
+        $(document).on(this.EVENT_PLAY, call);
+    }
+
+    media.getVideoPlayer = function (type = "video") {
+        return $(dialogs.getDialogId('media-player') + " video");
     };
+
+    this.mediaEntryFrom = (mediaFile) => {
+        const ext = flm.utils.getExt(mediaFile);
+        const mediaType = flm.utils.getFileTypeByExtension(ext);
+
+        return {
+            file: flm.utils.buildPath([this.endpoint, mediaFile]),
+            type: mediaType,
+            isImage: (mediaType === "image")
+        };
+    }
+
+    media.showPlayer = (mediaEntry) => {
+        const what = mediaEntry.isImage ? 'media-image-view' : 'media-player';
+        let diagConf = dialogs.getDialogConfig(what);
+
+        diagConf.options = {mediaEntry: mediaEntry};
+
+        return dialogs.setDialogConfig(what, diagConf)
+            .showDialog(what, {beforeHide: () => !mediaEntry.isImage && media.stop()});
+    }
 
     media.stop = function () {
         var player = media.getVideoPlayer();
+        //console.log('media.stop player', player, player.data.inPipMode);
         player.length > 0 && player[0].pause();
+        if (player.data.inPipMode) {
+            document.exitPictureInPicture();
+        }
     };
 
     media.doScreenshots = function (sourceFile, screenShotFileName) {
@@ -39,8 +76,7 @@ plugin.flmMedia = function () {
         screenshotFile = flm.stripJailPath(screenshotFile);
         flm.media.destinationPath = screenshotFile;
 
-        if('sheet' === 'sheet')
-        {
+        if ('sheet' === 'sheet') {
             theWebUI.startConsoleTask("screensheet", plugin.name, {
                 workdir: flm.getCurrentPath(),
                 method: 'createFileScreenSheet',
@@ -53,29 +89,28 @@ plugin.flmMedia = function () {
         }
 
         return media.onTaskDone.promise().then(function (task) {
-                flm.actions.refreshIfCurrentPath(flm.utils.basedir(screenshotFile));
-                return task;
+            flm.actions.refreshIfCurrentPath(flm.utils.basedir(screenshotFile));
+            return task;
         });
     };
 
     media.setDialogs = function (flmDialogs) {
 
         var viewsPath = plugin.path + 'views/';
-        var endpoint = $type(plugin.config.public_endpoint) && plugin.config.public_endpoint !== "" ? plugin.config.public_endpoint : flm.utils.rtrim(window.location.href, '/') + '/' + plugin.path + 'view.php';
 
         flm.views.namespaces['flm-media'] = viewsPath;
 
         flm.ui.dialogs.setDialogConfig('media-player', {
-                options: {
-                    public_endpoint: endpoint,
-                    views: "flm-media"
-                },
-                modal: false,
-                template: viewsPath + "dialog-media-player"
-            })
+            options: {
+                public_endpoint: media.endpoint,
+                views: "flm-media"
+            },
+            modal: false,
+            template: viewsPath + "dialog-media-player"
+        })
             .setDialogConfig('media-image-view', {
                 options: {
-                    public_endpoint: endpoint,
+                    public_endpoint: media.endpoint,
                     views: "flm-media"
                 },
                 modal: false,
@@ -83,7 +118,7 @@ plugin.flmMedia = function () {
             })
             .setDialogConfig('media-screenshots', {
                 options: {
-                    public_endpoint: endpoint,
+                    public_endpoint: media.endpoint,
                     views: "flm-media"
                 },
                 modal: true,
@@ -137,8 +172,25 @@ plugin.flmMedia = function () {
     };
 
     media.init = function () {
-        window.flm.ui.filenav.onSetEntryMenu(media.setMenuEntries);
+        // media icons
+        for (let f in config.allowedFormats) {
+            flm.utils.extTypes[f] = (ext) => ext.match(new RegExp('^(' + config.allowedFormats[f] + ')$', "i"));
+        }
+
+        flm.ui.filenav.onSetEntryMenu(media.setMenuEntries);
         media.setDialogs(flm.ui.getDialogs());
+        media.onPlayMedia((e, mediaEntry) => {
+            if (!mediaEntry.isImage) {
+                $(".flm-media-player")
+                    .removeClass(['flm-media-player-audio', 'flm-media-player-video'])
+                    .addClass(["flm-media-player-" + mediaEntry.type]);
+                let video = media.getVideoPlayer()[0];
+                let sources = video.getElementsByTagName('source');
+                sources[0].src = mediaEntry.file;
+                video.load();
+                video.play();
+            }
+        });
     };
 
     return media;
@@ -164,7 +216,7 @@ plugin.onTaskFinished = function (task, onBackground) {
     let destination = flm.media.destinationPath;
 
     const text = `${theUILang.flm_media_screens_file}: <a href="javascript: flm.showPath('${flm.utils.basedir(destination)}',`
-    + `'${flm.utils.basename(destination)}')">${destination}</a>`;
+        + `'${flm.utils.basename(destination)}')">${destination}</a>`;
 
     flm.actions.notify(text, 'success');
 
@@ -184,4 +236,4 @@ plugin.onTaskFinished = function (task, onBackground) {
 	$('#VPLAY_diag').remove();
 }*/
 plugin.loadLang();
-plugin.loadCSS('media');
+plugin.loadCSS('css/media');
