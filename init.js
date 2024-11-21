@@ -15,16 +15,20 @@ plugin.flmMedia = function () {
     let media = this;
 
     this.play = function (target) {
-        let mediaEntry = this.mediaEntryFrom(target);
+        let mediaEntry = $type(target) === "string" ? this.mediaEntryFrom(target) : target;
         let contentTypePlayer = mediaEntry.isImage ? $(".flm-media-image-viewer") : this.getVideoPlayer();
 
+        let dialogConfig = this.showPlayer(mediaEntry);
+
         contentTypePlayer.length
-        && $(document).trigger(this.EVENT_PLAY, [mediaEntry])
-        || this.showPlayer(mediaEntry);
+        && $(`#${dialogConfig.diagWindow}`).trigger(this.EVENT_PLAY, [mediaEntry]);
     };
 
-    this.onPlayMedia = (call) => {
-        $(document).on(this.EVENT_PLAY, call);
+    this.onPlayMedia = (diagWindow, call) => {
+
+        // see how to implement unsubscribes / off ()
+        // use dialog window as it being removed and its subscribers ?
+        $(`#${diagWindow}`).on(this.EVENT_PLAY, call);
     }
 
     media.getVideoPlayer = function (type = "video") {
@@ -36,9 +40,12 @@ plugin.flmMedia = function () {
         const mediaType = flm.utils.getFileTypeByExtension(ext);
 
         return {
-            file: flm.utils.buildPath([this.endpoint, mediaFile]),
+            file: mediaFile,
+            url: flm.utils.buildPath([this.endpoint, mediaFile]),
             type: mediaType,
-            isImage: (mediaType === "image")
+            isImage: (mediaType === "image"),
+            isAudio: (mediaType === "audio"),
+            isVideo: (mediaType === "video")
         };
     }
 
@@ -48,8 +55,15 @@ plugin.flmMedia = function () {
 
         diagConf.options = {mediaEntry: mediaEntry};
 
-        return dialogs.setDialogConfig(what, diagConf)
-            .showDialog(what, {beforeHide: () => !mediaEntry.isImage && media.stop()});
+        let player = media.getVideoPlayer();
+
+        if(mediaEntry.isImage || !(player.length > 0) || !player.data.inPipMode)
+        {
+            dialogs.setDialogConfig(what, diagConf)
+                .showDialog(what, {beforeHide: () => !mediaEntry.isImage && media.stop()});
+        }
+
+        return diagConf;
     }
 
     media.stop = function () {
@@ -106,6 +120,9 @@ plugin.flmMedia = function () {
                 views: "flm-media"
             },
             modal: false,
+            persist: true,
+            pathbrowse: true,
+            pathbrowseFiles: true,
             template: viewsPath + "dialog-media-player"
         })
             .setDialogConfig('media-image-view', {
@@ -114,6 +131,9 @@ plugin.flmMedia = function () {
                     views: "flm-media"
                 },
                 modal: false,
+                persist: true,
+                pathbrowse: true,
+                pathbrowseFiles: true,
                 template: viewsPath + "dialog-image-view"
             })
             .setDialogConfig('media-screenshots', {
@@ -179,18 +199,7 @@ plugin.flmMedia = function () {
 
         flm.ui.filenav.onSetEntryMenu(media.setMenuEntries);
         media.setDialogs(flm.ui.getDialogs());
-        media.onPlayMedia((e, mediaEntry) => {
-            if (!mediaEntry.isImage) {
-                $(".flm-media-player")
-                    .removeClass(['flm-media-player-audio', 'flm-media-player-video'])
-                    .addClass(["flm-media-player-" + mediaEntry.type]);
-                let video = media.getVideoPlayer()[0];
-                let sources = video.getElementsByTagName('source');
-                sources[0].src = mediaEntry.file;
-                video.load();
-                video.play();
-            }
-        });
+
     };
 
     return media;

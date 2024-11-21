@@ -1,13 +1,14 @@
 {% extends "flm::dialog-window.twig" %}
 
 {% block content %}
-    {{ window.pathBrowser(basename(selectedTarget), 'File', "", "disabled readonly") }}
+    {{ window.pathBrowser(selectedTarget, 'File', "", "") }}
+
     <div class="ratio" style="resize: both; overflow: auto; min-height:480px; max-height: 700px; min-width: 700px;">
         <div class="flm-media-image-viewer" style="min-height:480px; overflow:scroll">
-            <figure class="zoom" onmousemove="zoom(event)" style="
+            <figure class="zoom" onmousemove="flm.media.zoom(event)" style="
                     width: 100%;
-                    background-image: url('{{ mediaEntry.file  }}')">
-                <img src="{{ mediaEntry.file  }}" />
+                    background-image: url('{{ mediaEntry.url }}')">
+                <img src="{{ mediaEntry.url }}"/>
             </figure>
         </div>
     </div>
@@ -21,9 +22,11 @@
             overflow: hidden;
             cursor: zoom-in;
         }
+
         figure.zoom img:hover {
             opacity: 0;
         }
+
         figure.zoom img {
             transition: opacity .5s;
             display: block;
@@ -31,27 +34,46 @@
         }
     </style>
     <script>
-        var offsetX, offsetY;
-        offsetX = offsetY = 0;
+        (() => {
 
-        function zoom(e)
-        {
-                var zoomer = e.currentTarget;
-                $type(e.offsetX) ? offsetX = e.offsetX : offsetX = e.touches[0].pageX;
-                $type(e.offsetY) ? offsetY = e.offsetY : offsetX = e.touches[0].pageX;
-                var x = offsetX/zoomer.offsetWidth*100;
-                var y = offsetY/zoomer.offsetHeight*100;
-                zoomer.style.backgroundPosition = x + '% ' + y + '%';
-        }
+            let dialogs = flm.ui.getDialogs();
+            const diagId = dialogs.getCurrentDialog();
 
-        flm.media.onPlayMedia((e, mediaEntry) => {
-            if(mediaEntry.isImage)
-            {
-                let viewer = $(".flm-media-image-viewer");
-                viewer.find('img').attr('src', mediaEntry.file);
-                viewer.find('figure').css('background-image', `url(${mediaEntry.file})`);
-            }
-        });
+            // wait for rDir to load
+            setTimeout(() => {
+
+                let pathBrowser = dialogs.dirBrowserInput(diagId);
+
+                var offsetX, offsetY;
+                offsetX = offsetY = 0;
+
+                flm.media.zoom = function(e) {
+                    var zoomer = e.currentTarget;
+                    $type(e.offsetX) ? offsetX = e.offsetX : offsetX = e.touches[0].pageX;
+                    $type(e.offsetY) ? offsetY = e.offsetY : offsetX = e.touches[0].pageX;
+                    var x = offsetX / zoomer.offsetWidth * 100;
+                    var y = offsetY / zoomer.offsetHeight * 100;
+                    zoomer.style.backgroundPosition = x + '% ' + y + '%';
+                }
+
+                flm.media.updateImage = (mediaEntry) => {
+                    let viewer = $(".flm-media-image-viewer");
+                    dialogs.updateTargetPath(diagId, mediaEntry.file);
+                    viewer.find('img').attr('src', mediaEntry.url);
+                    viewer.find('figure').css('background-image', `url(${mediaEntry.url})`);
+                };
+
+                flm.media.onPlayMedia(diagId, (e, mediaEntry) => {
+                    mediaEntry.isImage && flm.media.updateImage(mediaEntry);
+                });
+
+                pathBrowser.on("change", () => {
+                    let entry = flm.media.mediaEntryFrom(flm.stripJailPath(pathBrowser.val()));
+                    entry.isImage && flm.media.play(entry);
+                });
+
+            });
+        })()
     </script>
 
 {% endblock %}

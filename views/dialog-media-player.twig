@@ -1,13 +1,17 @@
 {% extends "flm::dialog-window.twig" %}
 
 {% block content %}
-    {{ window.pathBrowser(basename(selectedTarget), 'File', "", "disabled readonly") }}
+    {{ window.pathBrowser(selectedTarget, 'File', "", "disabled readonly") }}
     <hr class="m-0">
     <div class="row">
         <div class="flm-media-player flm-media-player-{{ mediaEntry.type }} ratio {{ mediaEntry.type == "video" ? "ratio-16x9" : "" }}"
-             style="resize: both; overflow: auto; min-width: 480px;" >
-            <video width="100%" height="auto" class="ratio ratio-16x9" controls>
-                <source src="{{ mediaEntry.file }}" type="video/mp4">
+             style="resize: both; overflow: auto;">
+            <video width="100%"
+                   height="auto"
+                   class="ratio ratio-16x9"
+                   poster="plugins/filemanager-media/css/{{ mediaEntry.type }}_file.svg"
+                   controls>
+                <source src="{{ mediaEntry.url }}" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
         </div>
@@ -16,8 +20,42 @@
 {% block scripts %}
     <script>
         (() => {
-            flm.media.getVideoPlayer().on('enterpictureinpicture', () => $(this).data.inPipMode=true)
-                .on('leavepictureinpicture', () => $(this).data.inPipMode=false);
+            let dialogs = flm.ui.getDialogs();
+            const diagId = dialogs.getCurrentDialog();
+            let pathBrowser = dialogs.dirBrowserInput(diagId);
+
+            let media = flm.media;
+            let player = media.getVideoPlayer();
+            player.on('enterpictureinpicture', () => {
+                $(this).data.inPipMode = true;
+                $(`#${diagId}`).hide();
+            })
+                .on('leavepictureinpicture', () => {
+                    $(this).data.inPipMode = false;
+                    $(`#${diagId}`).show();
+
+                   // dialogs.showDialog(diagId)
+                });
+
+            media.onPlayMedia(diagId, (e, mediaEntry) => {
+                if (!mediaEntry.isImage) {
+                    $(".flm-media-player")
+                        .removeClass(['flm-media-player-audio', 'flm-media-player-video'])
+                        .addClass(["flm-media-player-" + mediaEntry.type]);
+                    player.attr("poster", `plugins/filemanager-media/css/${mediaEntry.type}_file.svg`);
+                    let video = player[0];
+                    dialogs.updateTargetPath(diagId, mediaEntry.file);
+                    let sources = video.getElementsByTagName('source');
+                    sources[0].src = mediaEntry.url;
+                    video.load();
+                    video.play();
+                }
+            });
+
+            pathBrowser.on("change", () => {
+                let entry = flm.media.mediaEntryFrom(flm.stripJailPath(pathBrowser.val()));
+                (entry.isAudio || entry.isVideo) && flm.media.play(entry);
+            });
         })(window);
     </script>
 
