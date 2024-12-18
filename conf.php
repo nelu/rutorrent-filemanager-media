@@ -6,7 +6,6 @@
 // $streampath = '/plugins/filemanager-media/view.php';
 $streampath = $_ENV['RU_FLM_MEDIA_ENDPOINT'] ?? './plugins/filemanager-media/view.php';
 
-
 // regex file extensions
 $allowedFormats = [
     'video' => 'avi|divx|mpeg|mp4|mkv|webm',

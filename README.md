@@ -6,23 +6,26 @@ A plugin which extends filemanager functionality by adding media view capabiliti
 - image viewer with zoom support
 - create video [screenshots functionality](https://github.com/nelu/rutorrent-filemanager-media/wiki): tile mosaic
 
+
 #### Settings available in the screenshot dialog:
  - Screens rows: number of thumbnail rows in the output screensheet 
  - Screens columns: number of thumbnail columns in the output screensheet 
  - Thumbnail width: the width of each cell in the screensheet tile
-
-![ffmpeg-screenshots](https://github.com/nelu/rutorrent-filemanager-media/assets/3987091/ae027bbf-3f23-48a4-9f90-d3b645de971d)
+   
+See [Wiki](https://github.com/nelu/rutorrent-filemanager-media/wiki) for screenshots
 
 #### Plugin configuration
-All configuration options reside in `conf.php`:
+All configuration options reside in `conf.php` and some of them support ENV config variables
   - `$allowedFormats` holds the allowed media formats file extensions (audio/video/image) in regex format
   - `$streampath` is useful when you need a different url path for your media files, ex: when you use a replacement video player in your browser and which does not support web auth 
 ```php 
-$streampath = '';
+$streampath = $_ENV['RU_FLM_MEDIA_ENDPOINT'] ?? './plugins/filemanager-media/view.php';
+
+// regex file extensions
 $allowedFormats = [
-    'video' => 'avi|divx|mpeg|mp4|mkv',
-    'audio' => 'mp3|wav|ogg',
-    'image' => 'png|jpe?g'
+    'video' => 'avi|divx|mpeg|mp4|mkv|webm',
+    'audio' => 'mp3|wav|ogg|aac',
+    'image' => 'png|jpe?g|gif|ico|bmp|svg|webp'
 ];
 ```
 
