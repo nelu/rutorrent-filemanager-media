@@ -1,4 +1,4 @@
-plugin.description: File Manager media plugin.
+plugin.description: Extends File Manager plugin with media content view/create functionality
 plugin.author: HWK
 plugin.version: 1.3
 rtorrent.remote: error
