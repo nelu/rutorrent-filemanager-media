@@ -9,7 +9,7 @@
             <video width="100%"
                    height="auto"
                    class="ratio ratio-16x9"
-                   poster="plugins/filemanager-media/css/{{ mediaEntry.type }}_file.svg"
+                   poster="{{ plugin.path }}/css/{{ mediaEntry.type }}_file.svg"
                    controls>
                 <source src="{{ mediaEntry.url }}" type="video/mp4">
                 Your browser does not support the video tag.

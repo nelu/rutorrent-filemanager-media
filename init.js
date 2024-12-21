@@ -53,7 +53,10 @@ plugin.flmMedia = function () {
         const what = mediaEntry.isImage ? 'media-image-view' : 'media-player';
         let diagConf = dialogs.getDialogConfig(what);
 
-        diagConf.options = {mediaEntry: mediaEntry};
+        diagConf.options = {
+            mediaEntry: mediaEntry,
+            plugin: plugin
+        };
 
         let player = media.getVideoPlayer();
 
