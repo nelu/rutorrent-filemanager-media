@@ -13,15 +13,15 @@
     background-image: url("video_file.svg") !important;
 }
 
-.sprite-media-screenshots {
+.sprite-media_screenshots {
     background-image:  url("photo_reel.svg") !important;
 }
 
-.sprite-media-player {
+.sprite-media_player {
     background-image:  url("start.svg") !important;
 }
 
-.sprite-media-image-view {
+.sprite-media_image_view {
     background-image:  url("gallery.svg") !important;
 }
 

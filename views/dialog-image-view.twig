@@ -8,7 +8,7 @@
             <figure class="zoom" onmousemove="flm.media.zoom(event)" style="
                     width: 100%;
                     background-image: url('{{ mediaEntry.url }}')">
-                <img src="{{ mediaEntry.url }}"/>
+                <img alt="{{ mediaEntry.file }}" src="{{ mediaEntry.url }}"/>
             </figure>
         </div>
     </div>
@@ -60,7 +60,7 @@
                     let viewer = $(".flm-media-image-viewer");
                     dialogs.updateTargetPath(diagId, mediaEntry.file);
                     viewer.find('img').attr('src', mediaEntry.url);
-                    viewer.find('figure').css('background-image', `url(${mediaEntry.url})`);
+                    viewer.stop(true, true).find('figure').css('background-image', `url('${mediaEntry.url}')`);
                 };
 
                 flm.media.onPlayMedia(diagId, (e, mediaEntry) => {

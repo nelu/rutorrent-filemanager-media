@@ -5,13 +5,7 @@ use Flm\Media\FileManagerMedia;
 
 $pluginDir = dirname(__FILE__);
 require_once($pluginDir . '/boot.php');
-require_once($pluginDir . '/conf.php');
+$config = include($pluginDir . '/conf.php');
 
-$conf = Helper::getConfig();
-
-$conf['allowedViewFormats'] = $allowedViewFormats;
-$conf['allowedFormats'] = $allowedFormats;
-
-$c = new FileManagerMedia($conf);
-
-$c->handleRequest();
+(new FileManagerMedia(array_merge_recursive(Helper::getConfig(), $config)))
+    ->handleRequest();

@@ -14,7 +14,8 @@
         <div class="row mb-3 ">
             <div class="input-group">
                 <label class="input-group-text" for="flm-media-screenshots-type">Format</label>
-                <select id="flm-media-screenshots-type" class="form-select flm-media-screenshots-type" name="flm-media-screenshots-type"
+                <select id="flm-media-screenshots-type" class="form-select flm-media-screenshots-type"
+                        name="flm-media-screenshots-type"
                         aria-label="Format" disabled>
                     <option value="sheet" selected>Screensheet (single file - mosaic)</option>
 
@@ -25,8 +26,9 @@
         <div class="row mb-3 flm-media-screensheet-settings " style="">
             <div class="col-md-4 position-relative">
                 <div class="input-group has-validation">
-                    <label class="input-group-text"  for="flm-settings-opt-sccols" class="form-label">Columns</label>
-                    <input type="number" min="1" step="1" max="1000" value="4" class="form-control" id="flm-settings-opt-sccols" required>
+                    <label class="input-group-text form-label" for="flm-settings-opt-sccols">Columns</label>
+                    <input type="number" min="1" step="1" max="1000" value="4" class="form-control"
+                           id="flm-settings-opt-sccols" required>
                     <div class="invalid-tooltip">
                         Please input a valid columns number: 1-1000.
                     </div>
@@ -34,8 +36,9 @@
             </div>
             <div class="col-md-4 position-relative">
                 <div class="input-group has-validation">
-                    <label class="input-group-text"  for="flm-settings-opt-scrows" class="form-label">Rows</label>
-                    <input type="number" min="1" step="1" max="1000" value="10" class="form-control" id="flm-settings-opt-scrows" required>
+                    <label class="input-group-text form-label" for="flm-settings-opt-scrows">Rows</label>
+                    <input type="number" min="1" step="1" max="1000" value="10" class="form-control"
+                           id="flm-settings-opt-scrows" required>
                     <div class="invalid-tooltip">
                         Please input a valid rows number: 1-1000.
                     </div>
@@ -44,8 +47,9 @@
 
             <div class="col-md-4 position-relative">
                 <div class="input-group has-validation">
-                    <label class="input-group-text"  for="flm-settings-opt-scwidth" class="form-label">Width</label>
-                    <input type="number" min="90" step="90" max="10000" value="320" class="form-control" id="flm-settings-opt-scwidth" required>
+                    <label class="input-group-text form-label" for="flm-settings-opt-scwidth">Width</label>
+                    <input type="number" min="90" step="90" max="10000" value="320" class="form-control"
+                           id="flm-settings-opt-scwidth" required>
                     <div class="invalid-tooltip">
                         Please input a valid size: 90-10000.
                     </div>
@@ -57,14 +61,12 @@
 
 {% block scripts %}
     <script>
-        (function (global) {
+        (function () {
             let dialogs = flm.ui.getDialogs();
             const diagId = dialogs.getCurrentDialog();
             let pathBrowser = dialogs.dirBrowserInput(diagId);
             let videoFile = $(".flm-diag-nav-path-screens-source");
             let ext = 'jpg';
-
-            const cPath = flm.getCurrentPath();
 
             let sheet_settings = $(".flm-media-screensheet-settings");
 
@@ -73,14 +75,7 @@
             let screen_cols = $("#flm-settings-opt-sccols");
             let screen_width = $("#flm-settings-opt-scwidth");
 
-            var updateFilePath = function (path, forceExtension = true) {
-                let filePath = flm.utils.replaceFilePath(path.val(), path.data('previousValue'), ext, forceExtension ? ext : false);
-                dialogs.updateTargetPath(diagId, filePath);
-            };
-
-            dialogs.onStart(() => flm.media.doScreensheet(
-                flm.utils.buildPath([cPath, flm.utils.basename(videoFile.val())]),
-                dialogs.getTargetPath(diagId),
+            dialogs.onStart(() => flm.media.doScreensheet(videoFile, pathBrowser,
                 {
                     type: type.val(),
                     rows: screen_rows.val(),
@@ -88,6 +83,13 @@
                     width: screen_width.val()
                 }
             ));
+
+
+            var updateFilePath = function (path, forceExtension = true) {
+                let filePath = flm.utils.replaceFilePath(path.val(), path.data('previousValue'), ext, forceExtension ? ext : false);
+                dialogs.updateTargetPath(diagId, filePath);
+            };
+
 
             dialogs.dirBrowserInput(diagId).change(function (event) {
                 updateFilePath($(this));
@@ -99,7 +101,7 @@
 
             updateFilePath(pathBrowser, true);
 
-        })(window);
+        })();
     </script>
 {% endblock %}
 

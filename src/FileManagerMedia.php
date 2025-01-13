@@ -80,7 +80,7 @@ class FileManagerMedia extends BaseController
         $ext = Helper::getExt($file);
 
         if (!preg_match('/^('.$this->allowedViewFormats.')$/i', $ext)) {
-            self::jsonError('404 Invalid format' . $ext);
+            self::jsonError('404 Invalid format: ' . $ext);
         }
 
 

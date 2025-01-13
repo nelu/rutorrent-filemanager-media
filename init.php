@@ -1,12 +1,7 @@
 <?php
-
-require_once ($pluginDir . '/conf.php');
-
+$config = include('conf.php');
 $theSettings->registerPlugin("filemanager-media");
-$jResult.= 'plugin.config = '.json_encode([
-        'public_endpoint'=> $streampath,
-        'allowedFormats' => $allowedFormats,
-        'allowedViewFormats' => $allowedViewFormats
-        ]) . ';';
+$jResult .= 'plugin.config = ' . json_encode($config) . ';';
+
 
 

@@ -1,10 +1,9 @@
 <?php
-
-// path on domain where a symlink to view.php can be found
-// change only if you use web AUTH
-// example: http://mydomain.com/stream/view.php
-// $streampath = '/plugins/filemanager-media/view.php';
-$streampath = $_ENV['RU_FLM_MEDIA_ENDPOINT'] ?? './plugins/filemanager-media/view.php';
+global $pathToExternals;
+// set with fullpath to binary or leave empty
+$pathToExternals['ffmpeg'] ?? (
+    $pathToExternals['ffmpeg'] = ''
+);
 
 // regex file extensions
 $allowedFormats = [
@@ -13,4 +12,13 @@ $allowedFormats = [
     'image' => 'png|jpe?g|gif|ico|bmp|svg|webp'
 ];
 
-$allowedViewFormats = implode("|", $allowedFormats);
+return [
+    // path on domain where a symlink to view.php can be found
+    // change only if you use web AUTH
+    // example: https://mydomain.com/rutorrent/plugins/filemanager-media/stream/view.php
+    // 'streampath' = './plugins/filemanager-media/view.php';
+    'streampath' => $_ENV['RU_FLM_MEDIA_ENDPOINT'] ?? '',
+
+    'allowedFormats' => $allowedFormats,
+    'allowedViewFormats' => implode("|", $allowedFormats)
+];
