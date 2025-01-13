@@ -17,9 +17,12 @@ See [Wiki](https://github.com/nelu/rutorrent-filemanager-media/wiki) for screens
 #### Plugin configuration
 All configuration options reside in `conf.php` and some of them support ENV config variables
   - `$allowedFormats` holds the allowed media formats file extensions (audio/video/image) in regex format
-  - `$streampath` is useful when you need a different url path for your media files, ex: when you use a replacement video player in your browser and which does not support web auth 
-```php 
-$streampath = $_ENV['RU_FLM_MEDIA_ENDPOINT'] ?? './plugins/filemanager-media/view.php';
+  - `streampath` is useful when you need a different url path for your media files, ex: when you use a replacement video player in your browser and which does not support web auth 
+```php
+// set with fullpath to binary or leave empty
+$pathToExternals['ffmpeg'] ?? (
+    $pathToExternals['ffmpeg'] = ''
+);
 
 // regex file extensions
 $allowedFormats = [
@@ -27,6 +30,18 @@ $allowedFormats = [
     'audio' => 'mp3|wav|ogg|aac',
     'image' => 'png|jpe?g|gif|ico|bmp|svg|webp'
 ];
+
+return [
+    // path on domain where a symlink to view.php can be found
+    // change only if you use web AUTH
+    // example: https://mydomain.com/rutorrent/plugins/filemanager-media/stream/view.php
+    // 'streampath' = './plugins/filemanager-media/view.php';
+    'streampath' => $_ENV['RU_FLM_MEDIA_ENDPOINT'] ?? '',
+
+    'allowedFormats' => $allowedFormats,
+    'allowedViewFormats' => implode("|", $allowedFormats)
+];
+
 ```
 
 ##### TODO:
